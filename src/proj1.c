@@ -1,12 +1,12 @@
 /* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt
 
-*----------------------------------------------------------------------*
-*                        Gestor de Aeroportos                          *
-*                                                                      *
-*  Projeto 1 -  21/22                                                  *
-*  Licenciatura em Engenharia Informática e de Computadores (Alameda)  *
-*  Instituto Superior Técnico                                          *
-*----------------------------------------------------------------------*/
+*--------------------------------------------------------------------*
+*                       Gestor de Aeroportos                         *
+*                                                                    *
+* Projeto 1 -  21/22                                                 *
+* Licenciatura em Engenharia Informática e de Computadores (Alameda) *
+* Instituto Superior Técnico                                         *
+*--------------------------------------------------------------------*/
 
 #include "constants.h"
 #include "prototypes.h"
