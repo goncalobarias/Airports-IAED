@@ -3,7 +3,7 @@
 *--------------------------------------------------------------------*
 *                       Airport Manager                              *
 *                                                                    *
-* 1st Project - 21/22                                                *
+* 1st IAED Project - 21/22                                           *
 * Computer Science and Engineering (Alameda)                         *
 * Instituto Superior Técnico                                         *
 *--------------------------------------------------------------------*/
