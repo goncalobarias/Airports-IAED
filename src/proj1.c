@@ -1,10 +1,10 @@
 /* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt
 
 *--------------------------------------------------------------------*
-*                       Gestor de Aeroportos                         *
+*                       Airport Manager                              *
 *                                                                    *
-* Projeto 1 -  21/22                                                 *
-* Licenciatura em Engenharia Informática e de Computadores (Alameda) *
+* 1st Project - 21/22                                                *
+* Computer Science and Engineering (Alameda)                         *
 * Instituto Superior Técnico                                         *
 *--------------------------------------------------------------------*/
 
@@ -56,42 +56,43 @@ int main() {
 }
 
 /*
- *
+ * Handles the 'a' command.
+ * Adds a new airport to the system with the specified ID, country and city.
  */
 void AddAirport() {
 	/**/
 }
 
 /*
- *
+ * Handles the 'l' command.
  */
 void ListAirports() {
 	/**/
 }
 
 /*
- *
+ * Handles the 'v' command.
  */
 void AddFlight() {
 	/**/
 }
 
 /*
- *
+ * Handles the 'p' command.
  */
 void FlightDeparturesInAirport() {
 	/**/
 }
 
 /*
- *
+ * Handles the 'c' command.
  */
 void FlightArrivalsInAirport() {
 	/**/
 }
 
 /*
- *
+ * Handles the 't' command.
  */
 void AdvanceSystemDate() {
 	/**/
