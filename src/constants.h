@@ -6,3 +6,4 @@
 #define MAX_CODE_LENGTH 6
 #define DATE_LENGTH 10
 #define TIME_LENGTH 5
+#define MAX_FLIGHTS 30000
