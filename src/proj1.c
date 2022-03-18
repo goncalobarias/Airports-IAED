@@ -16,7 +16,7 @@
 #include "constants.h"
 #include "prototypes.h"
 
-/*
+/**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
  * If the "run" variable has a value of 0 the program stops.
@@ -55,7 +55,7 @@ int main() {
 	return 0;
 }
 
-/*
+/**
  * Handles the 'a' command.
  * Adds a new airport to the system with the specified ID, country and city.
  */
@@ -63,35 +63,35 @@ void AddAirport() {
 	/**/
 }
 
-/*
+/**
  * Handles the 'l' command.
  */
 void ListAirports() {
 	/**/
 }
 
-/*
+/**
  * Handles the 'v' command.
  */
 void AddFlight() {
 	/**/
 }
 
-/*
+/**
  * Handles the 'p' command.
  */
 void FlightDeparturesInAirport() {
 	/**/
 }
 
-/*
+/**
  * Handles the 'c' command.
  */
 void FlightArrivalsInAirport() {
 	/**/
 }
 
-/*
+/**
  * Handles the 't' command.
  */
 void AdvanceSystemDate() {
