@@ -8,10 +8,22 @@ typedef struct {
 
 typedef struct {
 	char flight_code[MAX_CODE_LENGTH];
-
-
+	airport departure;
+	airport arrival;
 	char date[DATE_LENGTH];
 	char time[TIME_LENGTH];
 	int duration;
 	int max_passengers;
 } flight;
+
+void AddAirport();
+
+void ListAirports();
+
+void AddFlight();
+
+void FlightDeparturesInAirport();
+
+void FlightArrivalsInAirport();
+
+void AdvanceSystemDate();

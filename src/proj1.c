@@ -16,6 +16,9 @@
 #include "constants.h"
 #include "prototypes.h"
 
+/* Global variables */
+
+
 /**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
@@ -24,7 +27,7 @@
 int main() {
 	int c, run = 1;
 
-	while (run == 1) {
+	while (run) {
 		c = getchar();
 		switch(c) {
 			case 'q':
@@ -65,6 +68,9 @@ void AddAirport() {
 
 /**
  * Handles the 'l' command.
+ * If no arguments are provided it will print all of the airports in
+ * alphabetical order.
+ * Otherwise, the function prints the airports with the specified IDs.
  */
 void ListAirports() {
 	/**/
@@ -72,6 +78,11 @@ void ListAirports() {
 
 /**
  * Handles the 'v' command.
+ * If no arguments are provided it will print all of the flights in alphabetical
+ * order.
+ * Otherwise, the function adds a new flight to the system with the specified
+ * flight code, airport of departure id, airport of arrival id, date of
+ * departure, time of departure, duration of flight and capacity of the flight.
  */
 void AddFlight() {
 	/**/
@@ -79,6 +90,7 @@ void AddFlight() {
 
 /**
  * Handles the 'p' command.
+ * Lists all of the flights that depart from the airport with the given ID.
  */
 void FlightDeparturesInAirport() {
 	/**/
@@ -86,6 +98,7 @@ void FlightDeparturesInAirport() {
 
 /**
  * Handles the 'c' command.
+ * Lists all of the flights that arrive at the airport with the given ID.
  */
 void FlightArrivalsInAirport() {
 	/**/
@@ -93,6 +106,7 @@ void FlightArrivalsInAirport() {
 
 /**
  * Handles the 't' command.
+ * Forwards the date of the system.
  */
 void AdvanceSystemDate() {
 	/**/
