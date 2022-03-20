@@ -1,11 +1,24 @@
+# Author: Francisco Salgueiro
+
 #!/bin/bash
 
+if [[ $# -lt 2 ]]; then
+	echo "usage: $0 <relative_path_to_executable> <relative_path_to_tests_dir> <flags>"
+	echo "-v flag to display diff in the terminal"
+	echo "-c flag to remove generated result files"
+	echo "note: do not use the -c option without -v"
+	exit
+fi
+
+bin="${1}"
+tests="${2}"
+
 make -s -C src
-for infile in ./tests-public/*.in; do
+for infile in $PWD/$tests/*.in; do
     basename=${infile%.*}
-    ./src/$1 < $infile > $basename.result
+	($PWD/$bin) < $infile > $basename.result
     cmp --silent $basename.result $basename.out || echo "$basename TEST FAILED"
-    if [ "$2" == "-v" ]; then
+    if [ "$3" == "-v" ]; then
         if ! command -v colordiff &> /dev/null; then
             diff $basename.result $basename.out
         else
@@ -15,11 +28,15 @@ for infile in ./tests-public/*.in; do
 done
 rm -rf src/proj1
 
-if [ "$2" == "-v" ]; then
+if [ "$3" == "-v" ]; then
     if ! command -v colordiff &> /dev/null
     then
         echo ""
-        echo "NOTA: Instala colordiff para ver as diferenças a cores"
+        echo "NOTA: Instala colordiff para ver as diferenÃ§as a cores"
         exit
     fi
+fi
+
+if [ "$4" == "-c" ]; then
+	rm $PWD/$tests/*result
 fi

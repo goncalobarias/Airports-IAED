@@ -17,10 +17,11 @@
 #include "prototypes.h"
 
 /* Global variables */
-int totalAirports = 0; 					/* tracks the total amount of airports added by the user */
-int totalFlights = 0; 					/* tracks the total amount of flights added by the user */
-airport allAirports[MAX_AIRPORTS]; 		/* stores all of the current airports */
-flight allFlights[MAX_FLIGHTS]; 		/* stores all of the current flights */
+int totalAirports = 0; 						/* tracks the total amount of airports added by the user */
+int totalFlights = 0; 						/* tracks the total amount of flights added by the user */
+airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
+flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
+char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
 
 /**
  * Handles command input.
@@ -32,7 +33,7 @@ int main() {
 	int run = 1;
 
 	while (run) {
-		scanf("%s", c);
+		GetOneArgument(c, 0);
 		switch(c[0]) {
 			case 'q':
 				/* 'q' command stops the program */
@@ -62,38 +63,87 @@ int main() {
 }
 
 /**
+ *
+ */
+char GetOneArgument(char *argument, const int mode) {
+	int c, i = 0;
+
+	while ((!mode && (c = getchar()) != ' ' && c != '\t' && c != '\n')
+			|| (mode && (c = getchar()) != '\n')) {
+		argument[i++] = c;
+	}
+	argument[i] = '\0';
+
+	return c; /* returns the last character read from stdin */
+}
+
+/**
  * Handles the 'a' command.
  * Adds a new airport to the system with the specified ID, country and city.
  */
 void AddAirport() {
-	char id[ID_LENGTH];
-	int i;
+	char id[ID_LENGTH], country[MAX_COUNTRY_LENGTH], city[MAX_CITY_LENGTH];
 
-	if (totalAirports > MAX_AIRPORTS) {
-		printf(AIRPORT_ERR_TOO_MANY);
+	GetOneArgument(id, 0);
+	GetOneArgument(country, 0);
+	GetOneArgument(city, 1);
+
+	if (CheckAddAirportErrors(id))
 		return;
-	}
 
-	scanf("%s", id);
-	for (i = 0; i < ID_LENGTH - 1; i++)
-		if (id[i] < 'A' || id[i] > 'Z') {
-			printf(AIRPORT_ERR_INVALID);
-			return;
-		}
-	for (i = 0; i < totalAirports; i++)
-	 	if (!strcmp(allAirports[i].id, id)) {
-	 		printf(AIRPORT_ERR_DUPLICATE);
-	 		return;
-	  	}
-
+	/* actually add the aiport to the system */
 	strcpy(allAirports[totalAirports].id, id);
-	scanf("%s", allAirports[totalAirports].country);
-	getchar(); /* removes the trailing white space before the city name */
-	scanf("%[^\n]", allAirports[totalAirports].city);
+	strcpy(allAirports[totalAirports].country, country);
+	strcpy(allAirports[totalAirports].city, city);
+	allAirports[totalAirports].num_flight_departures = 0;
+
+	AddSortedAirportID(id);
 
 	printf("airport %s\n", allAirports[totalAirports].id);
 
 	totalAirports++;
+}
+
+/**
+ *
+ */
+void AddSortedAirportID(char *id) {
+}
+
+/**
+ *
+ */
+int GetAirportFromID(char *id) {
+	int i;
+
+	for (i = 0; i < totalAirports; i++)
+		if (!strcmp(allAirports[i].id, id))
+			return i;
+
+	return -1;
+}
+
+/**
+ *
+ */
+int CheckAddAirportErrors(char *id) {
+	int i;
+
+	if (totalAirports >= MAX_AIRPORTS) {
+		printf(AIRPORT_ERR_TOO_MANY);
+		return 1;
+	}
+	for (i = 0; i < ID_LENGTH - 1; i++)
+		if (id[i] < 'A' || id[i] > 'Z') {
+			printf(AIRPORT_ERR_INVALID);
+			return 1;
+		}
+	if (GetAirportFromID(id) != -1)  {
+		printf(AIRPORT_ERR_DUPLICATE);
+	 	return 1;
+	}
+
+	return 0;
 }
 
 /**
@@ -103,7 +153,48 @@ void AddAirport() {
  * Otherwise, the function prints the airports with the specified IDs.
  */
 void ListAirports() {
-	/**/
+	char id[ID_LENGTH];
+	int i;
+
+	while (GetOneArgument(id, 0) != '\n') {
+		if (CheckAirportValidity(id))
+			return;
+
+		i = GetAirportFromID(id);
+
+		printf("%s %s %s %d\n", id, allAirports[i].city, allAirports[i].country,
+		 					allAirports[i].num_flight_departures);
+	}
+
+	if (id[0] == '\0') {
+		ListAllAirports();
+	}
+}
+
+/**
+ *
+ */
+void ListAllAirports() {
+	int i, j;
+
+	for (i = 0; i < MAX_AIRPORTS; i++) {
+		j = GetAirportFromID(sortedIDs[i]);
+		printf("%s %s %s %d\n", sortedIDs[i], allAirports[j].city,
+		 					allAirports[j].country,
+		 					allAirports[j].num_flight_departures);
+	}
+}
+
+/**
+ *
+ */
+int CheckAirportValidity(char *id) {
+	if (GetAirportFromID(id) != -1) {
+		printf(AIRPORT_ERR_NO_ID);
+		return 0;
+	}
+
+	return 1;
 }
 
 /**

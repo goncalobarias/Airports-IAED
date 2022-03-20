@@ -28,3 +28,15 @@ void FlightDeparturesInAirport();
 void FlightArrivalsInAirport();
 
 void AdvanceSystemDate();
+
+char GetOneArgument(char *argument, const int mode);
+
+int CheckAddAirportErrors(char *id);
+
+void ListAllAirports();
+
+void AddSortedAirportID(char *id);
+
+int GetAirportFromID(char *id);
+
+int CheckAirportValidity(char *id);
