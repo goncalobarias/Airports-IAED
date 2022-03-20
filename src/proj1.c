@@ -17,7 +17,10 @@
 #include "prototypes.h"
 
 /* Global variables */
-
+int totalAirports = 0; 					/* tracks the total amount of airports added by the user */
+int totalFlights = 0; 					/* tracks the total amount of flights added by the user */
+airport allAirports[MAX_AIRPORTS]; 		/* stores all of the current airports */
+flight allFlights[MAX_FLIGHTS]; 		/* stores all of the current flights */
 
 /**
  * Handles command input.
@@ -25,13 +28,14 @@
  * If the "run" variable has a value of 0 the program stops.
  */
 int main() {
-	int c, run = 1;
+	char c[MAX_COMMAND_LENGTH];
+	int run = 1;
 
 	while (run) {
-		c = getchar();
-		switch(c) {
+		scanf("%s", c);
+		switch(c[0]) {
 			case 'q':
-				/* stops the program */
+				/* 'q' command stops the program */
 				run = 0;
 				break;
 			case 'a':
@@ -54,7 +58,6 @@ int main() {
 				break;
 		}
 	}
-
 	return 0;
 }
 
@@ -63,7 +66,34 @@ int main() {
  * Adds a new airport to the system with the specified ID, country and city.
  */
 void AddAirport() {
-	/**/
+	char id[ID_LENGTH];
+	int i;
+
+	if (totalAirports > MAX_AIRPORTS) {
+		printf(AIRPORT_ERR_TOO_MANY);
+		return;
+	}
+
+	scanf("%s", id);
+	for (i = 0; i < ID_LENGTH - 1; i++)
+		if (id[i] < 'A' || id[i] > 'Z') {
+			printf(AIRPORT_ERR_INVALID);
+			return;
+		}
+	for (i = 0; i < totalAirports; i++)
+	 	if (!strcmp(allAirports[i].id, id)) {
+	 		printf(AIRPORT_ERR_DUPLICATE);
+	 		return;
+	  	}
+
+	strcpy(allAirports[totalAirports].id, id);
+	scanf("%s", allAirports[totalAirports].country);
+	getchar(); /* removes the trailing white space before the city name */
+	scanf("%[^\n]", allAirports[totalAirports].city);
+
+	printf("airport %s\n", allAirports[totalAirports].id);
+
+	totalAirports++;
 }
 
 /**

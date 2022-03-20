@@ -4,7 +4,6 @@ TARGET=proj1
 
 all:
 	$(CC) $(CFLAGS) *.c -o $(TARGET)
-	./$(TARGET)
 
 clean:
 	rm $(TARGET)

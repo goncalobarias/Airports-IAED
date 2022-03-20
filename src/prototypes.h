@@ -4,6 +4,7 @@ typedef struct {
 	char id[ID_LENGTH];
 	char country[MAX_COUNTRY_LENGTH];
 	char city[MAX_CITY_LENGTH];
+	int num_flight_departures;
 } airport;
 
 typedef struct {
