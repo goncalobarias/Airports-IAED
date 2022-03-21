@@ -19,7 +19,7 @@ typedef struct {
 
 void AddAirport();
 
-void ListAirports();
+void ListAirports(char lastchar);
 
 void AddFlight();
 

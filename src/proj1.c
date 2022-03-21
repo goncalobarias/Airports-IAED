@@ -17,8 +17,8 @@
 #include "prototypes.h"
 
 /* Global variables */
-int totalAirports = 0; 						/* tracks the total amount of airports added by the user */
-int totalFlights = 0; 						/* tracks the total amount of flights added by the user */
+int totalAirports; 							/* tracks the total amount of airports added by the user */
+int totalFlights; 							/* tracks the total amount of flights added by the user */
 airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
 char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
@@ -29,11 +29,11 @@ char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alp
  * If the "run" variable has a value of 0 the program stops.
  */
 int main() {
-	char c[MAX_COMMAND_LENGTH];
+	char c[MAX_COMMAND_LENGTH], lastchar;
 	int run = 1;
 
 	while (run) {
-		GetOneArgument(c, 0);
+		lastchar = GetOneArgument(c, 0);
 		switch(c[0]) {
 			case 'q':
 				/* 'q' command stops the program */
@@ -43,7 +43,7 @@ int main() {
 				AddAirport();
 				break;
 			case 'l':
-				ListAirports();
+				ListAirports(lastchar);
 				break;
 			case 'v':
 				AddFlight();
@@ -59,6 +59,7 @@ int main() {
 				break;
 		}
 	}
+
 	return 0;
 }
 
@@ -108,6 +109,30 @@ void AddAirport() {
  *
  */
 void AddSortedAirportID(char *id) {
+	int first, middle, last, index;
+	int i;
+
+	if (!totalAirports)
+		index = 0;
+	else {
+		first = 0;
+		last = totalAirports - 1;
+		while (first != last && last - first != 1) {
+			middle = (first + last) / 2;
+			if (strcmp(sortedIDs[middle], id) < 0)
+				first = middle + 1;
+			else
+				last = middle - 1;
+		}
+
+		index = first;
+		if (first != last || strcmp(sortedIDs[middle], id) < 0)
+			index += 1;
+	}
+
+	for (i = totalAirports; i > index; i--)
+		strcpy(sortedIDs[i - 1], sortedIDs[i]);
+	strcpy(sortedIDs[index], id);
 }
 
 /**
@@ -152,9 +177,14 @@ int CheckAddAirportErrors(char *id) {
  * alphabetical order.
  * Otherwise, the function prints the airports with the specified IDs.
  */
-void ListAirports() {
+void ListAirports(char lastchar) {
 	char id[ID_LENGTH];
 	int i;
+
+	if (lastchar == '\n') {
+		ListAllAirports();
+		return;
+	}
 
 	while (GetOneArgument(id, 0) != '\n') {
 		if (CheckAirportValidity(id))
@@ -165,10 +195,6 @@ void ListAirports() {
 		printf("%s %s %s %d\n", id, allAirports[i].city, allAirports[i].country,
 		 					allAirports[i].num_flight_departures);
 	}
-
-	if (id[0] == '\0') {
-		ListAllAirports();
-	}
 }
 
 /**
@@ -177,7 +203,7 @@ void ListAirports() {
 void ListAllAirports() {
 	int i, j;
 
-	for (i = 0; i < MAX_AIRPORTS; i++) {
+	for (i = 0; i < totalAirports; i++) {
 		j = GetAirportFromID(sortedIDs[i]);
 		printf("%s %s %s %d\n", sortedIDs[i], allAirports[j].city,
 		 					allAirports[j].country,
