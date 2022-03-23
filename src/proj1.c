@@ -12,9 +12,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
-#include "constants.h"
-#include "prototypes.h"
+#include "proj1.h"
 
 /* Global variables */
 int totalAirports; 							/* tracks the total amount of airports added by the user */
@@ -29,12 +27,12 @@ char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alp
  * If the "run" variable has a value of 0 the program stops.
  */
 int main() {
-	char c[MAX_COMMAND_LENGTH], lastchar;
+	char c;
 	int run = 1;
 
 	while (run) {
-		lastchar = GetOneArgument(c, 0);
-		switch(c[0]) {
+		c = getchar();
+		switch(c) {
 			case 'q':
 				/* 'q' command stops the program */
 				run = 0;
@@ -43,10 +41,10 @@ int main() {
 				AddAirport();
 				break;
 			case 'l':
-				ListAirports(lastchar);
+				ListAirports();
 				break;
 			case 'v':
-				AddFlight();
+				AddFlight_ListFlights();
 				break;
 			case 'p':
 				FlightDeparturesInAirport();
@@ -61,21 +59,6 @@ int main() {
 	}
 
 	return 0;
-}
-
-/**
- *
- */
-char GetOneArgument(char *argument, const int mode) {
-	int c, i = 0;
-
-	while ((!mode && (c = getchar()) != ' ' && c != '\t' && c != '\n')
-			|| (mode && (c = getchar()) != '\n')) {
-		argument[i++] = c;
-	}
-	argument[i] = '\0';
-
-	return c; /* returns the last character read from stdin */
 }
 
 /**
@@ -106,121 +89,29 @@ void AddAirport() {
 }
 
 /**
- *
- */
-void AddSortedAirportID(char *id) {
-	int first, middle, last, index;
-	int i;
-
-	if (!totalAirports)
-		index = 0;
-	else {
-		first = 0;
-		last = totalAirports - 1;
-		while (first != last && last - first != 1) {
-			middle = (first + last) / 2;
-			if (strcmp(sortedIDs[middle], id) < 0)
-				first = middle + 1;
-			else
-				last = middle - 1;
-		}
-
-		index = first;
-		if (first != last || strcmp(sortedIDs[middle], id) < 0)
-			index += 1;
-	}
-
-	for (i = totalAirports; i > index; i--)
-		strcpy(sortedIDs[i - 1], sortedIDs[i]);
-	strcpy(sortedIDs[index], id);
-}
-
-/**
- *
- */
-int GetAirportFromID(char *id) {
-	int i;
-
-	for (i = 0; i < totalAirports; i++)
-		if (!strcmp(allAirports[i].id, id))
-			return i;
-
-	return -1;
-}
-
-/**
- *
- */
-int CheckAddAirportErrors(char *id) {
-	int i;
-
-	if (totalAirports >= MAX_AIRPORTS) {
-		printf(AIRPORT_ERR_TOO_MANY);
-		return 1;
-	}
-	for (i = 0; i < ID_LENGTH - 1; i++)
-		if (id[i] < 'A' || id[i] > 'Z') {
-			printf(AIRPORT_ERR_INVALID);
-			return 1;
-		}
-	if (GetAirportFromID(id) != -1)  {
-		printf(AIRPORT_ERR_DUPLICATE);
-	 	return 1;
-	}
-
-	return 0;
-}
-
-/**
  * Handles the 'l' command.
  * If no arguments are provided it will print all of the airports in
  * alphabetical order.
  * Otherwise, the function prints the airports with the specified IDs.
  */
-void ListAirports(char lastchar) {
+void ListAirports() {
 	char id[ID_LENGTH];
-	int i;
+	int i, mode;
 
-	if (lastchar == '\n') {
-		ListAllAirports();
-		return;
-	}
-
-	while (GetOneArgument(id, 0) != '\n') {
+	while ((mode = GetOneArgument(id, 0)) != 0) {
 		if (CheckAirportValidity(id))
 			return;
 
 		i = GetAirportFromID(id);
-
 		printf("%s %s %s %d\n", id, allAirports[i].city, allAirports[i].country,
 		 					allAirports[i].num_flight_departures);
-	}
-}
 
-/**
- *
- */
-void ListAllAirports() {
-	int i, j;
-
-	for (i = 0; i < totalAirports; i++) {
-		j = GetAirportFromID(sortedIDs[i]);
-		printf("%s %s %s %d\n", sortedIDs[i], allAirports[j].city,
-		 					allAirports[j].country,
-		 					allAirports[j].num_flight_departures);
-	}
-}
-
-/**
- *
- */
-int CheckAirportValidity(char *id) {
-	if (GetAirportFromID(id) != -1) {
-		printf(AIRPORT_ERR_NO_ID);
-		return 0;
+		if (mode == 2)
+			return;
 	}
 
-	return 1;
+	if (mode == 0)
+		ListAllAirports();
 }
 
 /**
@@ -231,8 +122,52 @@ int CheckAirportValidity(char *id) {
  * flight code, airport of departure id, airport of arrival id, date of
  * departure, time of departure, duration of flight and capacity of the flight.
  */
-void AddFlight() {
-	/**/
+void AddFlight_ListFlights() {
+	char argument[MAX_COMMAND_LENGTH];
+	int i, mode;
+
+	for (i = 0; i <= 6; i++) {
+		mode = GetOneArgument(argument, 0);
+		if (mode == 0) {
+			ListAllFlights();
+			break;
+		}
+		switch(i) {
+			case 0: /* flight code */
+				if (CheckFlightCodeErrors(argument))
+					return;
+				strcpy(allFlights[totalFlights].flight_code, argument);
+				break;
+			case 1: /* arrival id */
+				if (CheckAirportValidity(argument))
+					return;
+				break;
+			case 2: /* departure id */
+				if (CheckAirportValidity(argument))
+					return;
+				break;
+			case 3: /* date */
+				if (CheckDateErrors(argument))
+					return;
+				strcpy(allFlights[totalFlights].date, argument);
+				break;
+			case 4: /* time */
+				strcpy(allFlights[totalFlights].time, argument);
+				break;
+			case 5: /* duration */
+				if (CheckDurationErrors(argument))
+					return;
+				allFlights[totalFlights].duration = atoi(argument);
+				break;
+			case 6: /* capacity */
+				if (CheckCapacityErrors(argument))
+					return;
+				allFlights[totalFlights].capacity = atoi(argument);
+				break;
+		}
+	}
+
+	totalFlights++;
 }
 
 /**
@@ -257,4 +192,27 @@ void FlightArrivalsInAirport() {
  */
 void AdvanceSystemDate() {
 	/**/
+}
+
+/**
+ *
+ */
+char GetOneArgument(char *argument, const int mode) {
+	int c, i = 0;
+
+	while ((c = getchar()) != '\n' && c != EOF) {
+		if (i == 0 && isspace(c))
+			continue;
+		if (mode == 0 && isspace(c))
+			break;
+		argument[i++] = c;
+	}
+	argument[i] = '\0';
+
+	if (argument[0] == '\0')
+		return 0;
+	else if (c != '\n')
+		return 1;
+	else
+		return 2;
 }
