@@ -11,7 +11,7 @@ int GetAirportFromID(char *id) {
 	int i;
 
 	for (i = 0; i < totalAirports; i++)
-		if (!strcmp(allAirports[i].id, id))
+		if (strcmp(allAirports[i].id, id) == 0)
 			return i;
 
 	return -1;
@@ -78,20 +78,9 @@ void ListAllAirports() {
 
 	for (i = 0; i < totalAirports; i++) {
 		j = GetAirportFromID(sortedIDs[i]);
-		printf("%s %s %s %d\n", sortedIDs[i], allAirports[j].city,
-		 					allAirports[j].country,
-		 					allAirports[j].num_flight_departures);
+		printf("%s %s %s %d\n", allAirports[j].id,
+		 						allAirports[j].city,
+		 						allAirports[j].country,
+		 						allAirports[j].departures);
 	}
-}
-
-/**
- *
- */
-int CheckAirportValidity(char *id) {
-	if (GetAirportFromID(id) == -1) {
-		printf(AIRPORT_ERR_NO_ID, id);
-		return 1;
-	}
-
-	return 0;
 }

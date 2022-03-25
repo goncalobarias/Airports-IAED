@@ -20,6 +20,7 @@ int totalFlights; 							/* tracks the total amount of flights added by the user
 airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
 char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
+char present_date[TIME_LENGTH];				/* stores the present time */
 
 /**
  * Handles command input.
@@ -72,14 +73,13 @@ void AddAirport() {
 	GetOneArgument(country, 0);
 	GetOneArgument(city, 1);
 
-	if (CheckAddAirportErrors(id))
-		return;
+	if (CheckAddAirportErrors(id)) return;
 
 	/* actually add the aiport to the system */
 	strcpy(allAirports[totalAirports].id, id);
 	strcpy(allAirports[totalAirports].country, country);
 	strcpy(allAirports[totalAirports].city, city);
-	allAirports[totalAirports].num_flight_departures = 0;
+	allAirports[totalAirports].departures = 0;
 
 	AddSortedAirportID(id);
 
@@ -96,22 +96,24 @@ void AddAirport() {
  */
 void ListAirports() {
 	char id[ID_LENGTH];
-	int i, mode;
+	int i, state;
 
-	while ((mode = GetOneArgument(id, 0)) != 0) {
-		if (CheckAirportValidity(id))
-			return;
-
-		i = GetAirportFromID(id);
-		printf("%s %s %s %d\n", id, allAirports[i].city, allAirports[i].country,
-		 					allAirports[i].num_flight_departures);
-
-		if (mode == 2)
-			return;
+	if (getchar() == '\n') {
+		ListAllAirports();
+		return;
 	}
 
-	if (mode == 0)
-		ListAllAirports();
+	do {
+		state = GetOneArgument(id, 0);
+
+		if ((i = GetAirportFromID(id)) == -1) {
+			printf(AIRPORT_ERR_NO_ID, id);
+			return;
+		}
+
+		printf("%s %s %s %d\n", id, allAirports[i].city, allAirports[i].country,
+		 					allAirports[i].departures);
+	} while (state != 1);
 }
 
 /**
@@ -124,44 +126,49 @@ void ListAirports() {
  */
 void AddFlight_ListFlights() {
 	char argument[MAX_COMMAND_LENGTH];
-	int i, mode;
+	int i;
 
-	for (i = 0; i <= 6; i++) {
-		mode = GetOneArgument(argument, 0);
-		if (mode == 0) {
-			ListAllFlights();
-			break;
-		}
+	if (getchar() == '\n') {
+		ListAllFlights();
+		return;
+	}
+
+	for (i = 1; i <= 7; i++) {
+		GetOneArgument(argument, 0);
 		switch(i) {
-			case 0: /* flight code */
-				if (CheckFlightCodeErrors(argument))
-					return;
+			case 1: /* flight code */
+				if (CheckFlightCodeErrors(argument)) return;
 				strcpy(allFlights[totalFlights].flight_code, argument);
 				break;
-			case 1: /* arrival id */
-				if (CheckAirportValidity(argument))
+			case 2: /* arrival id */
+				if (GetAirportFromID(argument) == -1) {
+					printf(AIRPORT_ERR_NO_ID, argument);
 					return;
+				}
+				AddSortedFlight(argument, 0);
+				strcpy(allFlights[totalFlights].arrival_id, argument);
 				break;
-			case 2: /* departure id */
-				if (CheckAirportValidity(argument))
+			case 3: /* departure id */
+				if (GetAirportFromID(argument) == -1) {
+					printf(AIRPORT_ERR_NO_ID, argument);
 					return;
+				}
+				AddSortedFlight(argument, 1);
+				strcpy(allFlights[totalFlights].departure_id, argument);
 				break;
-			case 3: /* date */
-				if (CheckDateErrors(argument))
-					return;
+			case 4: /* date */
+				if (CheckTooManyFlights() || CheckDateErrors(argument)) return;
 				strcpy(allFlights[totalFlights].date, argument);
 				break;
-			case 4: /* time */
+			case 5: /* time */
 				strcpy(allFlights[totalFlights].time, argument);
 				break;
-			case 5: /* duration */
-				if (CheckDurationErrors(argument))
-					return;
+			case 6: /* duration */
+				if (CheckDurationErrors(argument)) return;
 				allFlights[totalFlights].duration = atoi(argument);
 				break;
-			case 6: /* capacity */
-				if (CheckCapacityErrors(argument))
-					return;
+			case 7: /* capacity */
+				if (CheckCapacityErrors(argument)) return;
 				allFlights[totalFlights].capacity = atoi(argument);
 				break;
 		}
@@ -175,7 +182,20 @@ void AddFlight_ListFlights() {
  * Lists all of the flights that depart from the airport with the given ID.
  */
 void FlightDeparturesInAirport() {
-	/**/
+	char id[ID_LENGTH];
+	int i, j;
+
+	GetOneArgument(id, 0);
+	if ((i = GetAirportFromID(id)) == -1) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return;
+	}
+
+	for (j = 0; j < allAirports[i].departures; j++)
+		printf("%s %s %s %s\n", allAirports[i].flightDepartures[j].flight_code,
+								allAirports[i].flightDepartures[j].arrival_id,
+								allAirports[i].flightDepartures[j].date,
+								allAirports[i].flightDepartures[j].time);
 }
 
 /**
@@ -183,7 +203,20 @@ void FlightDeparturesInAirport() {
  * Lists all of the flights that arrive at the airport with the given ID.
  */
 void FlightArrivalsInAirport() {
-	/**/
+	char id[ID_LENGTH];
+	int i, j;
+
+	GetOneArgument(id, 0);
+	if ((i = GetAirportFromID(id)) == -1) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return;
+	}
+
+	for (j = 0; j < allAirports[i].arrivals; j++)
+		printf("%s %s %s %s\n", allAirports[i].flightArrivals[j].flight_code,
+								allAirports[i].flightArrivals[j].departure_id,
+								allAirports[i].flightArrivals[j].flight_code,
+								allAirports[i].flightArrivals[j].flight_code);
 }
 
 /**
@@ -191,28 +224,29 @@ void FlightArrivalsInAirport() {
  * Forwards the date of the system.
  */
 void AdvanceSystemDate() {
-	/**/
+	char date[DATE_LENGTH];
+
+	GetOneArgument(date, 0);
+	if (CheckDateErrors(date)) return;
+	strcpy(present_date, date);
+
+	printf("%s\n", present_date);
 }
 
 /**
  *
  */
-char GetOneArgument(char *argument, const int mode) {
+char GetOneArgument(char *argument, const int state) {
 	int c, i = 0;
 
 	while ((c = getchar()) != '\n' && c != EOF) {
 		if (i == 0 && isspace(c))
 			continue;
-		if (mode == 0 && isspace(c))
+		if (state == 0 && isspace(c))
 			break;
 		argument[i++] = c;
 	}
 	argument[i] = '\0';
 
-	if (argument[0] == '\0')
-		return 0;
-	else if (c != '\n')
-		return 1;
-	else
-		return 2;
+	return (c != '\n' ? 0 : 1);
 }
