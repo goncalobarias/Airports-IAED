@@ -2,17 +2,20 @@
 
 /* constants */
 #define ID_LENGTH 4
-#define MAX_COUNTRY_LENGTH 30
-#define MAX_CITY_LENGTH 50
+#define MAX_COUNTRY_LENGTH 31
+#define MAX_CITY_LENGTH 51
 #define MAX_AIRPORTS 40
-#define MAX_FLIGHT_CODE_LENGTH 6
-#define DATE_LENGTH 10
-#define TIME_LENGTH 5
+#define MAX_FLIGHT_CODE_LENGTH 7
+#define DATE_LENGTH 11
+#define TIME_LENGTH 6
+#define MAX_CAPACITY_LENGTH 3
 #define MAX_FLIGHTS 30000
-#define MAX_COMMAND_LENGTH 10
 #define MAX_PASSENGERS 100
 #define MIN_PASSENGERS 10
-#define MAX_DURATION 12
+#define MAX_DURATION 720
+#define MONTHS 12
+#define MINS_YEAR 525600
+#define START_DAY "00:00"
 
 /* error messages */
 #define AIRPORT_ERR_TOO_MANY "too many airports\n"
@@ -31,12 +34,23 @@
  */
 
 typedef struct {
+	int hours;
+	int minutes;
+} time;
+
+typedef struct {
+	int day;
+	int month;
+	int year;
+	time clock;
+} date;
+
+typedef struct {
 	char flight_code[MAX_FLIGHT_CODE_LENGTH];
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
-	char date[DATE_LENGTH];
-	char time[TIME_LENGTH];
-	int duration;
+	date date_departure;
+	time duration;
 	int capacity;
 } flight;
 
@@ -56,7 +70,8 @@ extern int totalFlights;
 extern airport allAirports[MAX_AIRPORTS];
 extern flight allFlights[MAX_FLIGHTS];
 extern char sortedIDs[MAX_AIRPORTS][ID_LENGTH];
-extern char time[TIME_LENGTH];
+extern int sortedFlights[MAX_FLIGHTS];
+extern date present_date;
 
 /**
  * Prototypes
@@ -90,20 +105,26 @@ int GetAirportFromID(char *id);
 
 /* flights.c */
 
-int CheckFlightCodeErrors(char *flight_code);
+int CheckFlightCodeErrors(char *flight_code, char *date, char *time);
 
 int CheckTooManyFlights();
 
-int CheckDateErrors(char *date);
+int CheckDateErrors(char *date, char *time);
 
 int CheckDurationErrors(char *duration);
 
 int CheckCapacityErrors(char *capacity);
 
-int ConvertDateTimeToMinutes(char *date, char *time);
+date UpdateDate(date date_departure, time duration);
 
-void ConvertMinutesToDateTime(char *date, char *time, int minutes);
+int ConvertDatesToMins(date date);
 
-void AddSortedFlight(char *id, int mode);
+int CompareDates(date date_1, date date_2);
+
+time ReadTime(char *time);
+
+date ReadDate(char *date, char *time);
+
+void AddSortedFlight(flight new_flight);
 
 void ListAllFlights();
