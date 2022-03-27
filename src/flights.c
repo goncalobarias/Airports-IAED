@@ -191,7 +191,7 @@ clock ReadClock(char *calendar_date, char *hours_mins) {
 /**
  *
  */
-void AddSortedFlight(flight new_flight) {
+void AddSortedFlight_departure(flight new_flight) {
 	int first, middle, last, index, i;
 
 	if (totalFlights == 0)
@@ -201,7 +201,7 @@ void AddSortedFlight(flight new_flight) {
 		last = totalFlights - 1;
 		middle = (first + last) / 2;
 		while (first < last) {
-			if (CompareDates(allFlights[sortedFlights[middle]].date_departure,
+			if (CompareDates(allFlights[sortedFlights_departure[middle]].date_departure,
 							new_flight.date_departure, 1) < 0)
 				first = middle + 1;
 			else
@@ -209,16 +209,49 @@ void AddSortedFlight(flight new_flight) {
 			middle = (first + last) / 2;
 		}
 
-		index = first;
-		if (CompareDates(allFlights[sortedFlights[first]].date_departure,
-						new_flight.date_departure, 1) < 0)
-			index += 1;
+		index = first + 1;
+		if (CompareDates(allFlights[sortedFlights_departure[first]].date_departure,
+						new_flight.date_departure, 1) > 0)
+			index -= 1;
 	}
 
 	for (i = totalFlights - 1; i >= index; i--) {
-		sortedFlights[i + 1] = sortedFlights[i];
+		sortedFlights_departure[i + 1] = sortedFlights_departure[i];
 	}
-	sortedFlights[index] = totalFlights;
+	sortedFlights_departure[index] = totalFlights;
+}
+
+/**
+ *
+ */
+void AddSortedFlight_arrival(flight new_flight) {
+	int first, middle, last, index, i;
+
+	if (totalFlights == 0)
+		index = 0;
+	else {
+		first = 0;
+		last = totalFlights - 1;
+		middle = (first + last) / 2;
+		while (first < last) {
+			if (CompareDates(allFlights[sortedFlights_arrival[middle]].date_arrival,
+							new_flight.date_arrival, 1) < 0)
+				first = middle + 1;
+			else
+				last = middle - 1;
+			middle = (first + last) / 2;
+		}
+
+		index = first + 1;
+		if (CompareDates(allFlights[sortedFlights_arrival[first]].date_arrival,
+						new_flight.date_arrival, 1) > 0)
+			index -= 1;
+	}
+
+	for (i = totalFlights - 1; i >= index; i--) {
+		sortedFlights_arrival[i + 1] = sortedFlights_arrival[i];
+	}
+	sortedFlights_arrival[index] = totalFlights;
 }
 
 /**

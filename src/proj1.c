@@ -20,7 +20,8 @@ int totalFlights; 							/* tracks the total amount of flights added by the user
 airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
 char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
-int sortedFlights[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by date and time */
+int sortedFlights_departure[MAX_FLIGHTS];	/* stores the indexes of all the flights, sorted by departure date and time */
+int sortedFlights_arrival[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by arrival date and time */
 clock global_date = {1, 1, 2022, 0, 0};		/* stores the current date of the system */
 clock max_date = {1, 1, 2023, 0, 0};		/* stores the date that is one year in future from the current date */
 
@@ -175,7 +176,11 @@ void AddFlight_ListFlights() {
 	if (CheckCapacityErrors(capacity)) return;
 	allFlights[totalFlights].capacity = atoi(capacity);
 
-	AddSortedFlight(allFlights[totalFlights]);
+	allFlights[totalFlights].date_arrival = UpdateDate(allFlights[totalFlights].date_departure,
+											allFlights[totalFlights].duration);
+
+	AddSortedFlight_departure(allFlights[totalFlights]);
+	AddSortedFlight_arrival(allFlights[totalFlights]);
 
 	i = GetAirportFromID(departure_id);
 	allAirports[i].departures += 1;
@@ -198,7 +203,7 @@ void FlightDeparturesInAirport() {
 	}
 
 	for (j = 0; j < totalFlights; j++) {
-		i = sortedFlights[j];
+		i = sortedFlights_departure[j];
 		if (strcmp(allFlights[i].departure_id, id) == 0) {
 			printf("%s %s", allFlights[i].flight_code, allFlights[i].arrival_id);
 
@@ -217,7 +222,6 @@ void FlightDeparturesInAirport() {
  */
 void FlightArrivalsInAirport() {
 	char id[ID_LENGTH];
-	clock new_date;
 	int j, i;
 
 	GetOneArgument(id, 0);
@@ -227,16 +231,15 @@ void FlightArrivalsInAirport() {
 	}
 
 	for (j = 0; j < totalFlights; j++) {
-		i = sortedFlights[j];
+		i = sortedFlights_arrival[j];
 		if (strcmp(allFlights[i].arrival_id, id) == 0) {
-			new_date = UpdateDate(allFlights[i].date_departure,
-								allFlights[i].duration);
-
 			printf("%s %s", allFlights[i].flight_code, allFlights[i].departure_id);
 
-			printf(" %02d-%02d-%04d %02d:%02d\n", new_date.day, new_date.month,
-											new_date.year, new_date.hours,
-											new_date.minutes);
+			printf(" %02d-%02d-%04d %02d:%02d\n", allFlights[i].date_arrival.day,
+										allFlights[i].date_arrival.month,
+										allFlights[i].date_arrival.year,
+										allFlights[i].date_arrival.hours,
+										allFlights[i].date_arrival.minutes);
 		}
 	}
 }

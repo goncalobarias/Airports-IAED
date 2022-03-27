@@ -49,6 +49,7 @@ typedef struct {
 	char arrival_id[ID_LENGTH];
 	clock date_departure;
 	clock duration;
+	clock date_arrival;
 	int capacity;
 } flight;
 
@@ -68,7 +69,8 @@ extern int totalFlights;
 extern airport allAirports[MAX_AIRPORTS];
 extern flight allFlights[MAX_FLIGHTS];
 extern char sortedIDs[MAX_AIRPORTS][ID_LENGTH];
-extern int sortedFlights[MAX_FLIGHTS];
+extern int sortedFlights_departure[MAX_FLIGHTS];
+extern int sortedFlights_arrival[MAX_FLIGHTS];
 extern clock global_date;
 extern clock max_date;
 extern clock one_year;
@@ -123,6 +125,8 @@ int CompareDates(clock date_1, clock date_2, int mode);
 
 clock ReadClock(char *date, char *time);
 
-void AddSortedFlight(flight new_flight);
+void AddSortedFlight_departure(flight new_flight);
+
+void AddSortedFlight_arrival(flight new_flight);
 
 void ListAllFlights();
