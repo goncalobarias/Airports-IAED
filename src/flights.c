@@ -118,13 +118,13 @@ clock UpdateDate(clock date_departure, clock duration) {
 	date_arrival.year = date_departure.year + updated_date_mins / MINS_YEAR;
 	updated_date_mins = updated_date_mins % MINS_YEAR;
 
-	while (updated_date_mins >= days_months[i++] * 24 * 60) {
-		updated_date_mins -= days_months[i];
-		date_arrival.month = i;
+	while (updated_date_mins >= days_months[i++] * MINS_DAY) {
+		updated_date_mins -= days_months[i - 1] * MINS_DAY;
 	}
+	date_arrival.month = i;
 
-	date_arrival.day = updated_date_mins / (24 * 60);
-	updated_date_mins = updated_date_mins % (24 * 60);
+	date_arrival.day = updated_date_mins / MINS_DAY + 1;
+	updated_date_mins = updated_date_mins % MINS_DAY;
 
 	date_arrival.hours = updated_date_mins / 60;
 	date_arrival.minutes = updated_date_mins % 60;
@@ -136,14 +136,19 @@ clock UpdateDate(clock date_departure, clock duration) {
  *
  */
 int ConvertDatesToMins(clock formatted_date) {
-	int mins = 0, i, year_difference = formatted_date.year - 2022;
+	int mins = 0, i, year_difference;
 
+	if (formatted_date.year > 0)
+		year_difference = formatted_date.year - 2022;
+	else
+		year_difference = 0;
 	mins += (year_difference * MINS_YEAR);
 
 	for (i = 0; i < formatted_date.month - 1; i++)
 		mins += days_months[i] * 24 * 60;
 
-	mins += (formatted_date.day - 1) * 24 * 60;
+	if (formatted_date.day > 0)
+		mins += (formatted_date.day - 1) * 24 * 60;
 	mins += formatted_date.hours * 60;
 	mins += formatted_date.minutes;
 

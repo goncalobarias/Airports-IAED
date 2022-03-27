@@ -23,7 +23,6 @@ char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alp
 int sortedFlights[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by date and time */
 clock global_date = {1, 1, 2022, 0, 0};		/* stores the current date of the system */
 clock max_date = {1, 1, 2023, 0, 0};		/* stores the date that is one year in future from the current date */
-clock one_year = {0, 0, 1, 0, 0};
 
 /**
  * Handles command input.
@@ -253,7 +252,8 @@ void AdvanceSystemDate() {
 	if (CheckDateErrors(new_date, START_DAY)) return;
 
 	global_date = ReadClock(new_date, START_DAY);
-	max_date = UpdateDate(global_date, one_year);
+	max_date = global_date;
+	max_date.year += 1;
 
 	printf("%02d-%02d-%04d\n", global_date.day, global_date.month,
 							global_date.year);
