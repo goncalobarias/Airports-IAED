@@ -13,7 +13,7 @@ const int days_months[MONTHS] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
  */
 int CheckFlightCodeErrors(char *flight_code, char *date_departure, char *time) {
 	int i;
-	date date_depart = ReadDate(date_departure, time);
+	clock date_depart = ReadClock(date_departure, time);
 
 	for (i = 0; i < 2; i++)
 		if (flight_code[i] < 'A' || flight_code[i] > 'Z') {
@@ -65,10 +65,10 @@ int CheckTooManyFlights() {
  *
  */
 int CheckDateErrors(char *date_departure, char *time) {
-	date date_depart = ReadDate(date_departure, time);
+	clock date_depart = ReadClock(date_departure, time);
 
 	if (CompareDates(global_date, date_depart, 1) > 0 ||
-		CompareDates(max_date, date_depart, 0) <= 0) {
+		CompareDates(max_date, date_depart, 0) < 0) {
 		printf(FLIGHT_ERR_INVALID_DATE);
 		return 1;
 	}
@@ -80,7 +80,7 @@ int CheckDateErrors(char *date_departure, char *time) {
  *
  */
 int CheckDurationErrors(char *timespan) {
-	time duration = ReadTime(timespan);
+	clock duration = ReadClock(NO_DATE, timespan);
 	int dur = duration.hours * 60 + duration.minutes;
 
 	if (dur > MAX_DURATION) {
@@ -108,12 +108,12 @@ int CheckCapacityErrors(char *capacity) {
 /**
  *
  */
-date UpdateDate(date date_departure, date duration) {
+clock UpdateDate(clock date_departure, clock duration) {
 	int date_departure_mins = ConvertDatesToMins(date_departure);
-	int dur = duration.hours * 60 + duration.minutes;
+	int dur = ConvertDatesToMins(duration);
 	int updated_date_mins = date_departure_mins + dur;
 	int i = 0;
-	date date_arrival;
+	clock date_arrival;
 
 	date_arrival.year = date_departure.year + updated_date_mins / MINS_YEAR;
 	updated_date_mins = updated_date_mins % MINS_YEAR;
@@ -126,8 +126,8 @@ date UpdateDate(date date_departure, date duration) {
 	date_arrival.day = updated_date_mins / (24 * 60);
 	updated_date_mins = updated_date_mins % (24 * 60);
 
-	date_arrival.clock.hours = updated_date_mins / 60;
-	date_arrival.clock.minutes = updated_date_mins % 60;
+	date_arrival.hours = updated_date_mins / 60;
+	date_arrival.minutes = updated_date_mins % 60;
 
 	return date_arrival;
 }
@@ -135,7 +135,7 @@ date UpdateDate(date date_departure, date duration) {
 /**
  *
  */
-int ConvertDatesToMins(date formatted_date) {
+int ConvertDatesToMins(clock formatted_date) {
 	int mins = 0, i, year_difference = formatted_date.year - 2022;
 
 	mins += (year_difference * MINS_YEAR);
@@ -144,8 +144,8 @@ int ConvertDatesToMins(date formatted_date) {
 		mins += days_months[i] * 24 * 60;
 
 	mins += (formatted_date.day - 1) * 24 * 60;
-	mins += formatted_date.clock.hours * 60;
-	mins += formatted_date.clock.minutes;
+	mins += formatted_date.hours * 60;
+	mins += formatted_date.minutes;
 
 	return mins;
 }
@@ -153,7 +153,7 @@ int ConvertDatesToMins(date formatted_date) {
 /**
  *
  */
-int CompareDates(date date_1, date date_2, int mode) {
+int CompareDates(clock date_1, clock date_2, int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
 	int date_2_mins = ConvertDatesToMins(date_2);
 
@@ -161,7 +161,8 @@ int CompareDates(date date_1, date date_2, int mode) {
 		return 0;
 
 	if (mode == 0 && (date_1_mins - date_2_mins < MINS_DAY
-		|| date_1_mins - date_2_mins > -MINS_DAY) && date_1.day == date_2.day)
+		|| date_1_mins - date_2_mins > -MINS_DAY) && date_1.day == date_2.day
+		&& date_1.year == date_2.year)
 		return 0;
 
 	return (date_2_mins < date_1_mins ? 1 : -1);
@@ -170,26 +171,14 @@ int CompareDates(date date_1, date date_2, int mode) {
 /**
  *
  */
-time ReadTime(char *hours_mins) {
-	time clock;
-	char double_dots[1];
-
-	sscanf(hours_mins, "%d%c%d", &clock.hours, double_dots, &clock.minutes);
-
-	return clock;
-}
-
-/**
- *
- */
-date ReadDate(char *calendar_date, char *hours_mins) {
-	date date_departure;
-	char hifen[1];
+clock ReadClock(char *calendar_date, char *hours_mins) {
+	clock date_departure;
+	char hifen[1], double_dots[1];
 
 	sscanf(calendar_date, "%d%c%d%c%d", &date_departure.day, hifen,
 						&date_departure.month, hifen, &date_departure.year);
-
-	date_departure.clock = ReadTime(hours_mins);
+	sscanf(hours_mins, "%d%c%d", &date_departure.hours, double_dots,
+						&date_departure.minutes);
 
 	return date_departure;
 }
@@ -216,7 +205,7 @@ void AddSortedFlight(flight new_flight) {
 		}
 
 		index = first;
-		if (CompareDates(allFlights[sortedFlights[middle]].date_departure,
+		if (CompareDates(allFlights[sortedFlights[first]].date_departure,
 						new_flight.date_departure, 1) < 0)
 			index += 1;
 	}
@@ -241,7 +230,7 @@ void ListAllFlights() {
 		printf(" %02d-%02d-%04d %02d:%02d\n", allFlights[i].date_departure.day,
 										allFlights[i].date_departure.month,
 										allFlights[i].date_departure.year,
-										allFlights[i].date_departure.clock.hours,
-										allFlights[i].date_departure.clock.minutes);
+										allFlights[i].date_departure.hours,
+										allFlights[i].date_departure.minutes);
 	}
 }

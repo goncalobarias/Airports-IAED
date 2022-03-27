@@ -21,7 +21,9 @@ airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
 char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
 int sortedFlights[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by date and time */
-date global_date;							/* stores the elapsed time since the start of 2022 */
+clock global_date = {1, 1, 2022, 0, 0};		/* stores the current date of the system */
+clock max_date = {1, 1, 2023, 0, 0};		/* stores the date that is one year in future from the current date */
+clock one_year = {0, 0, 1, 0, 0};
 
 /**
  * Handles command input.
@@ -164,11 +166,11 @@ void AddFlight_ListFlights() {
 
  	/* date & time */
 	if (CheckTooManyFlights() || CheckDateErrors(date, time)) return;
-	allFlights[totalFlights].date_departure = ReadDate(date, time);
+	allFlights[totalFlights].date_departure = ReadClock(date, time);
 
 	/* duration */
 	if (CheckDurationErrors(duration)) return;
-	allFlights[totalFlights].duration = ReadTime(duration);
+	allFlights[totalFlights].duration = ReadClock(NO_DATE, duration);
 
 	/* capacity */
 	if (CheckCapacityErrors(capacity)) return;
@@ -198,14 +200,14 @@ void FlightDeparturesInAirport() {
 
 	for (j = 0; j < totalFlights; j++) {
 		i = sortedFlights[j];
-		if (strcmp(allFlights[i].arrival_id, id) == 0) {
+		if (strcmp(allFlights[i].departure_id, id) == 0) {
 			printf("%s %s", allFlights[i].flight_code, allFlights[i].arrival_id);
 
 			printf(" %02d-%02d-%04d %02d:%02d\n", allFlights[i].date_departure.day,
 										allFlights[i].date_departure.month,
 										allFlights[i].date_departure.year,
-										allFlights[i].date_departure.clock.hours,
-										allFlights[i].date_departure.clock.minutes);
+										allFlights[i].date_departure.hours,
+										allFlights[i].date_departure.minutes);
 		}
 	}
 }
@@ -216,7 +218,7 @@ void FlightDeparturesInAirport() {
  */
 void FlightArrivalsInAirport() {
 	char id[ID_LENGTH];
-	date new_date;
+	clock new_date;
 	int j, i;
 
 	GetOneArgument(id, 0);
@@ -227,15 +229,15 @@ void FlightArrivalsInAirport() {
 
 	for (j = 0; j < totalFlights; j++) {
 		i = sortedFlights[j];
-		if (strcmp(allFlights[i].departure_id, id) == 0) {
+		if (strcmp(allFlights[i].arrival_id, id) == 0) {
 			new_date = UpdateDate(allFlights[i].date_departure,
 								allFlights[i].duration);
 
 			printf("%s %s", allFlights[i].flight_code, allFlights[i].departure_id);
 
 			printf(" %02d-%02d-%04d %02d:%02d\n", new_date.day, new_date.month,
-											new_date.year, new_date.clock.hours,
-											new_date.clock.minutes);
+											new_date.year, new_date.hours,
+											new_date.minutes);
 		}
 	}
 }
@@ -250,8 +252,8 @@ void AdvanceSystemDate() {
 	GetOneArgument(new_date, 0);
 	if (CheckDateErrors(new_date, START_DAY)) return;
 
-	global_date = ReadDate(new_date, START_DAY);
-	max_date = UpdateDate(global_date);
+	global_date = ReadClock(new_date, START_DAY);
+	max_date = UpdateDate(global_date, one_year);
 
 	printf("%02d-%02d-%04d\n", global_date.day, global_date.month,
 							global_date.year);

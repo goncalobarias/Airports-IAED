@@ -17,6 +17,7 @@
 #define MINS_YEAR 525600
 #define MINS_DAY 1440
 #define START_DAY "00:00"
+#define NO_DATE "00-00-0000"
 
 /* error messages */
 #define AIRPORT_ERR_TOO_MANY "too many airports\n"
@@ -35,23 +36,19 @@
  */
 
 typedef struct {
-	int hours;
-	int minutes;
-} time;
-
-typedef struct {
 	int day;
 	int month;
 	int year;
-	time clock;
-} date;
+	int hours;
+	int minutes;
+} clock;
 
 typedef struct {
 	char flight_code[MAX_FLIGHT_CODE_LENGTH];
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
-	date date_departure;
-	time duration;
+	clock date_departure;
+	clock duration;
 	int capacity;
 } flight;
 
@@ -63,7 +60,7 @@ typedef struct {
 } airport;
 
 /**
- * Global variables
+ * Shared variables
  */
 
 extern int totalAirports;
@@ -72,8 +69,9 @@ extern airport allAirports[MAX_AIRPORTS];
 extern flight allFlights[MAX_FLIGHTS];
 extern char sortedIDs[MAX_AIRPORTS][ID_LENGTH];
 extern int sortedFlights[MAX_FLIGHTS];
-extern date global_date;
-extern date max_date;
+extern clock global_date;
+extern clock max_date;
+extern clock one_year;
 
 /**
  * Prototypes
@@ -117,15 +115,13 @@ int CheckDurationErrors(char *duration);
 
 int CheckCapacityErrors(char *capacity);
 
-date UpdateDate(date date_departure, time duration);
+clock UpdateDate(clock date_departure, clock duration);
 
-int ConvertDatesToMins(date date);
+int ConvertDatesToMins(clock date);
 
-int CompareDates(date date_1, date date_2, int mode);
+int CompareDates(clock date_1, clock date_2, int mode);
 
-time ReadTime(char *time);
-
-date ReadDate(char *date, char *time);
+clock ReadClock(char *date, char *time);
 
 void AddSortedFlight(flight new_flight);
 

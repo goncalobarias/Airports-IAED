@@ -61,7 +61,7 @@ void AddSortedAirportID(char *id) {
 		}
 
 		index = first;
-		if (strcmp(sortedIDs[middle], id) < 0)
+		if (strcmp(sortedIDs[first], id) < 0)
 			index += 1;
 	}
 
