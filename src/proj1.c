@@ -21,7 +21,7 @@ airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
 char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
 int sortedFlights[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by date and time */
-date present_date;							/* stores the present time */
+date global_date;							/* stores the elapsed time since the start of 2022 */
 
 /**
  * Handles command input.
@@ -245,15 +245,16 @@ void FlightArrivalsInAirport() {
  * Forwards the date of the system.
  */
 void AdvanceSystemDate() {
-	char date[DATE_LENGTH];
+	char new_date[DATE_LENGTH];
 
-	GetOneArgument(date, 0);
-	if (CheckDateErrors(date, START_DAY)) return;
+	GetOneArgument(new_date, 0);
+	if (CheckDateErrors(new_date, START_DAY)) return;
 
-	present_date = ReadDate(date, START_DAY);
+	global_date = ReadDate(new_date, START_DAY);
+	max_date = UpdateDate(global_date);
 
-	printf("%02d-%02d-%04d\n", present_date.day, present_date.month,
-							present_date.year);
+	printf("%02d-%02d-%04d\n", global_date.day, global_date.month,
+							global_date.year);
 }
 
 /**

@@ -15,6 +15,7 @@
 #define MAX_DURATION 720
 #define MONTHS 12
 #define MINS_YEAR 525600
+#define MINS_DAY 1440
 #define START_DAY "00:00"
 
 /* error messages */
@@ -71,7 +72,8 @@ extern airport allAirports[MAX_AIRPORTS];
 extern flight allFlights[MAX_FLIGHTS];
 extern char sortedIDs[MAX_AIRPORTS][ID_LENGTH];
 extern int sortedFlights[MAX_FLIGHTS];
-extern date present_date;
+extern date global_date;
+extern date max_date;
 
 /**
  * Prototypes
@@ -119,7 +121,7 @@ date UpdateDate(date date_departure, time duration);
 
 int ConvertDatesToMins(date date);
 
-int CompareDates(date date_1, date date_2);
+int CompareDates(date date_1, date date_2, int mode);
 
 time ReadTime(char *time);
 

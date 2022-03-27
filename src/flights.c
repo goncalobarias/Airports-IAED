@@ -21,12 +21,12 @@ int CheckFlightCodeErrors(char *flight_code, char *date_departure, char *time) {
 			return 1;
 		}
 
-	while (flight_code[i++] != '\0') {
-		if (i == 2 && flight_code[i - 1] == '0') {
+	while (flight_code[i] != '\0') {
+		if (i == 2 && flight_code[i] == '0') {
 			printf(FLIGHT_ERR_INVALID);
 			return 1;
 		}
-		if (flight_code[i - 1] < '0' || flight_code[i - 1] > '9') {
+		if (flight_code[i] < '0' || flight_code[i] > '9') {
 			printf(FLIGHT_ERR_INVALID);
 			return 1;
 		}
@@ -34,12 +34,13 @@ int CheckFlightCodeErrors(char *flight_code, char *date_departure, char *time) {
 			printf(FLIGHT_ERR_INVALID);
 			return 1;
 		}
+		i++;
 	}
 
 	for (i = 0; i < totalFlights; i++) {
 
-		if (strcmp(allFlights[i].flight_code, flight_code) == 0
-			&& CompareDates(allFlights[i].date_departure, date_depart) == 0) {
+		if (strcmp(allFlights[i].flight_code, flight_code) == 0 &&
+			CompareDates(allFlights[i].date_departure, date_depart, 0) == 0) {
 			printf(FLIGHT_ERR_DUPLICATE);
 			return 1;
 		}
@@ -65,10 +66,9 @@ int CheckTooManyFlights() {
  */
 int CheckDateErrors(char *date_departure, char *time) {
 	date date_depart = ReadDate(date_departure, time);
-	int one_year_future = ConvertDatesToMins(date_depart) + MINS_YEAR;
 
-	if (CompareDates(date_depart, present_date) == 1
-		|| one_year_future < ConvertDatesToMins(date_depart)) {
+	if (CompareDates(global_date, date_depart, 1) > 0 ||
+		CompareDates(max_date, date_depart, 0) <= 0) {
 		printf(FLIGHT_ERR_INVALID_DATE);
 		return 1;
 	}
@@ -108,7 +108,7 @@ int CheckCapacityErrors(char *capacity) {
 /**
  *
  */
-date UpdateDate(date date_departure, time duration) {
+date UpdateDate(date date_departure, date duration) {
 	int date_departure_mins = ConvertDatesToMins(date_departure);
 	int dur = duration.hours * 60 + duration.minutes;
 	int updated_date_mins = date_departure_mins + dur;
@@ -136,10 +136,9 @@ date UpdateDate(date date_departure, time duration) {
  *
  */
 int ConvertDatesToMins(date formatted_date) {
-	int mins = 0, i;
+	int mins = 0, i, year_difference = formatted_date.year - 2022;
 
-	if (formatted_date.year == 2023)
-		mins += 525600;
+	mins += (year_difference * MINS_YEAR);
 
 	for (i = 0; i < formatted_date.month - 1; i++)
 		mins += days_months[i] * 24 * 60;
@@ -154,13 +153,18 @@ int ConvertDatesToMins(date formatted_date) {
 /**
  *
  */
-int CompareDates(date date_1, date date_2) {
+int CompareDates(date date_1, date date_2, int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
 	int date_2_mins = ConvertDatesToMins(date_2);
 
-	if (date_1_mins == date_2_mins) return 0;
+	if (date_1_mins == date_2_mins)
+		return 0;
 
-	return (date_2_mins > date_1_mins ? 1 : -1);
+	if (mode == 0 && (date_1_mins - date_2_mins < MINS_DAY
+		|| date_1_mins - date_2_mins > -MINS_DAY) && date_1.day == date_2.day)
+		return 0;
+
+	return (date_2_mins < date_1_mins ? 1 : -1);
 }
 
 /**
@@ -204,7 +208,7 @@ void AddSortedFlight(flight new_flight) {
 		middle = (first + last) / 2;
 		while (first < last) {
 			if (CompareDates(allFlights[sortedFlights[middle]].date_departure,
-							new_flight.date_departure) > 0)
+							new_flight.date_departure, 1) < 0)
 				first = middle + 1;
 			else
 				last = middle - 1;
@@ -213,7 +217,7 @@ void AddSortedFlight(flight new_flight) {
 
 		index = first;
 		if (CompareDates(allFlights[sortedFlights[middle]].date_departure,
-						new_flight.date_departure) > 0)
+						new_flight.date_departure, 1) < 0)
 			index += 1;
 	}
 
