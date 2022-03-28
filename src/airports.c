@@ -78,9 +78,7 @@ void ListAllAirports() {
 
 	for (i = 0; i < totalAirports; i++) {
 		j = GetAirportFromID(sortedIDs[i]);
-		printf("%s %s %s %d\n", allAirports[j].id,
-		 						allAirports[j].city,
-		 						allAirports[j].country,
-		 						allAirports[j].departures);
+
+		PrintAirport(allAirports[j]);
 	}
 }
