@@ -21,6 +21,9 @@
 #define MAX_PASSENGERS 100
 #define MIN_PASSENGERS 10
 
+#define FLIGHT_PRINT "%s %s"
+#define FLIGHT_FULL_PRINT "%s %s %s"
+
 #define FLIGHT_ERR_INVALID "invalid flight code\n"
 #define FLIGHT_ERR_DUPLICATE "flight already exists\n"
 #define FLIGHT_ERR_TOO_MANY "too many flights\n"
@@ -79,7 +82,7 @@ extern int totalAirports;
 extern int totalFlights;
 extern airport allAirports[MAX_AIRPORTS];
 extern flight allFlights[MAX_FLIGHTS];
-extern char sortedIDs[MAX_AIRPORTS][ID_LENGTH];
+extern int sortedAirports[MAX_AIRPORTS];
 extern int sortedFlights_departure[MAX_FLIGHTS];
 extern int sortedFlights_arrival[MAX_FLIGHTS];
 extern clock global_date;
@@ -109,11 +112,11 @@ char GetOneArgument(char *argument, const int mode);
 
 int CheckAddAirportErrors(char *id);
 
-void ListAllAirports();
+int CheckAirportExistence(char *id);
 
-void AddSortedAirportID(char *id);
+void AddSortedAirport(airport airport_1);
 
-int GetAirportFromID(char *id);
+int GetAirport(char *id);
 
 /* flights.c */
 
@@ -121,9 +124,7 @@ int CheckFlightCodeErrors(char *flight_code, clock date);
 
 int CheckAddFlightErrors(flight new_flight);
 
-void AddSortedFlight_departure(flight new_flight);
-
-void AddSortedFlight_arrival(flight new_flight);
+void AddSortedFlight(int sort[], flight new_flight, int mode);
 
 void ListAllFlights();
 
@@ -138,6 +139,8 @@ clock UpdateDate(clock date_departure, clock duration);
 int ConvertDatesToMins(clock date);
 
 int CompareDates(clock date_1, clock date_2, int mode);
+
+int CompareFlightDates(flight flight_1, flight flight_2, int mode);
 
 clock ReadClock(char *date, char *time);
 

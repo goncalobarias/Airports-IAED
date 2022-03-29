@@ -7,21 +7,8 @@
 /**
  *
  */
-int GetAirportFromID(char *id) {
-	int i;
-
-	for (i = 0; i < totalAirports; i++)
-		if (strcmp(allAirports[i].id, id) == 0)
-			return i;
-
-	return -1;
-}
-
-/**
- *
- */
 int CheckAddAirportErrors(char *id) {
-	int i, id_len = strlen(id);
+	int i, id_len = strlen(id), j = GetAirport(id);
 
 	for (i = 0; i < id_len; i++)
 		if (id[i] < 'A' || id[i] > 'Z') {
@@ -32,7 +19,7 @@ int CheckAddAirportErrors(char *id) {
 		printf(AIRPORT_ERR_TOO_MANY);
 		return 1;
 	}
-	if (GetAirportFromID(id) != -1)  {
+	if (strcmp(allAirports[sortedAirports[j]].id, id) == 0)  {
 		printf(AIRPORT_ERR_DUPLICATE);
 	 	return 1;
 	}
@@ -43,42 +30,63 @@ int CheckAddAirportErrors(char *id) {
 /**
  *
  */
-void AddSortedAirportID(char *id) {
-	int first, middle, last, index, i;
+int CheckAirportExistence(char *id) {
+	int i = GetAirport(id);
 
-	if (totalAirports == 0)
-		index = 0;
-	else {
-		first = 0;
-		last = totalAirports - 1;
-		middle = (first + last) / 2;
-		while (first < last) {
-			if (strcmp(sortedIDs[middle], id) < 0)
-				first = middle + 1;
-			else
-				last = middle - 1;
-			middle = (first + last) / 2;
-		}
-
-		index = first;
-		if (strcmp(sortedIDs[first], id) < 0)
-			index += 1;
+	if (i == totalAirports ||
+		strcmp(allAirports[sortedAirports[i]].id, id) != 0) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return 1;
 	}
 
-	for (i = totalAirports - 1; i >= index; i--)
-		strcpy(sortedIDs[i + 1], sortedIDs[i]);
-	strcpy(sortedIDs[index], id);
+	return 0;
 }
 
 /**
  *
  */
-void ListAllAirports() {
-	int i, j;
+int GetAirport(char *id) {
+	int left, middle, right, comp;
 
-	for (i = 0; i < totalAirports; i++) {
-		j = GetAirportFromID(sortedIDs[i]);
+	if (totalAirports == 0)
+		return 0;
+	else {
+		left = 0;
+		right = totalAirports - 1;
+		middle = (left + right) / 2;
+		while (left < right) {
+			comp = strcmp(allAirports[sortedAirports[middle]].id, id);
+			if (comp == 0)
+				return middle;
+			else if (comp < 0)
+				left = middle + 1;
+			else
+				right = middle - 1;
+			middle = (left + right) / 2;
+		}
+		comp = strcmp(allAirports[sortedAirports[left]].id, id);
 
-		PrintAirport(allAirports[j]);
+		return (comp < 0 ? left + 1 : left);
 	}
+}
+
+/**
+ *
+ */
+void AddSortedAirport(airport airport_1) {
+	int index, i;
+
+	index = GetAirport(airport_1.id);
+
+	for (i = totalAirports - 1; i >= index; i--)
+		sortedAirports[i + 1] = sortedAirports[i];
+	sortedAirports[index] = totalAirports;
+}
+
+/**
+ *
+ */
+void PrintAirport(airport airport_1) {
+	printf(AIRPORT_PRINT, airport_1.id, airport_1.city, airport_1.country,
+ 						airport_1.departures);
 }

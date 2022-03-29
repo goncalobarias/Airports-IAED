@@ -99,6 +99,16 @@ int CompareDates(clock date_1, clock date_2, int mode) {
 /**
  *
  */
+int CompareFlightDates(flight flight_1, flight flight_2, int mode) {
+	if (mode == 0)
+		return CompareDates(flight_1.date_arrival, flight_2.date_arrival, 1);
+	else
+		return CompareDates(flight_1.date_departure, flight_2.date_departure, 1);
+}
+
+/**
+ *
+ */
 clock ReadClock(char *calendar_date, char *hours_mins) {
 	clock date_departure;
 	char hifen[1], double_dots[1];
@@ -114,9 +124,6 @@ clock ReadClock(char *calendar_date, char *hours_mins) {
 	return date_departure;
 }
 
-/**
- *
- */
 void PrintClock(clock date) {
 	printf(FULL_DATE_PRINT, date.day, date.month, date.year, date.hours,
 							date.minutes);

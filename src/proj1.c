@@ -19,7 +19,7 @@ int totalAirports; 							/* tracks the total amount of airports added by the us
 int totalFlights; 							/* tracks the total amount of flights added by the user */
 airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
-char sortedIDs[MAX_AIRPORTS][ID_LENGTH]; 	/* stores all of the IDs sorted by alphabetical order */
+int sortedAirports[MAX_AIRPORTS]; 			/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
 int sortedFlights_departure[MAX_FLIGHTS];	/* stores the indexes of all the flights, sorted by departure date and time */
 int sortedFlights_arrival[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by arrival date and time */
 clock global_date = {1, 1, 2022, 0, 0};		/* stores the current date of the system */
@@ -82,7 +82,7 @@ void AddAirport() {
 	/* actually add the aiport to the system */
 	allAirports[totalAirports] = new_airport;
 
-	AddSortedAirportID(allAirports[totalAirports].id);
+	AddSortedAirport(allAirports[totalAirports]);
 
 	printf(AIRPORT_ADD_PRINT, allAirports[totalAirports].id);
 
@@ -101,20 +101,18 @@ void ListAirports() {
 
 	/* if there is no arguments it lists all airports */
 	if (getchar() == '\n') {
-		ListAllAirports();
+		for (i = 0; i < totalAirports; i++)
+			PrintAirport(allAirports[sortedAirports[i]]);
 		return;
 	}
 
 	do {
 		state = GetOneArgument(id, 0);
 
-		/* checks the existence of the airport */
-		if ((i = GetAirportFromID(id)) == -1) {
-			printf(AIRPORT_ERR_NO_ID, id);
-			continue;
-		}
+		if (CheckAirportExistence(id)) continue;
+		i = GetAirport(id);
 
-		PrintAirport(allAirports[i]);
+		PrintAirport(allAirports[sortedAirports[i]]);
 	} while (state != 1);
 }
 
@@ -157,11 +155,11 @@ void AddFlight_ListFlights() {
 	/* actually add the flight to the system */
 	allFlights[totalFlights] = new_flight;
 
-	AddSortedFlight_departure(allFlights[totalFlights]);
-	AddSortedFlight_arrival(allFlights[totalFlights]);
+	AddSortedFlight(sortedFlights_arrival, allFlights[totalFlights], 0);
+	AddSortedFlight(sortedFlights_departure, allFlights[totalFlights], 1);
 
-	departure_airport = GetAirportFromID(new_flight.departure_id);
-	allAirports[departure_airport].departures += 1;
+	departure_airport = GetAirport(new_flight.departure_id);
+	allAirports[sortedAirports[departure_airport]].departures += 1;
 
 	totalFlights++;
 }
@@ -176,16 +174,13 @@ void FlightDeparturesInAirport() {
 	int j, i;
 
 	GetOneArgument(id, 0);
-	/* checks the existence of the airport */
-	if (GetAirportFromID(id) == -1) {
-		printf(AIRPORT_ERR_NO_ID, id);
-		return;
-	}
+	if (CheckAirportExistence(id)) return;
 
 	for (j = 0; j < totalFlights; j++) {
 		i = sortedFlights_departure[j];
 		if (strcmp(allFlights[i].departure_id, id) == 0) {
-			printf("%s %s", allFlights[i].flight_code, allFlights[i].arrival_id);
+			printf(FLIGHT_PRINT, allFlights[i].flight_code,
+		  						allFlights[i].arrival_id);
 
 			PrintClock(allFlights[i].date_departure);
 		}
@@ -202,16 +197,13 @@ void FlightArrivalsInAirport() {
 	int j, i;
 
 	GetOneArgument(id, 0);
-	/* checks the existence of the airport */
-	if (GetAirportFromID(id) == -1) {
-		printf(AIRPORT_ERR_NO_ID, id);
-		return;
-	}
+	if (CheckAirportExistence(id)) return;
 
 	for (j = 0; j < totalFlights; j++) {
 		i = sortedFlights_arrival[j];
 		if (strcmp(allFlights[i].arrival_id, id) == 0) {
-			printf("%s %s", allFlights[i].flight_code, allFlights[i].departure_id);
+			printf(FLIGHT_PRINT, allFlights[i].flight_code,
+		  						allFlights[i].departure_id);
 
 			PrintClock(allFlights[i].date_arrival);
 		}
@@ -240,15 +232,15 @@ void AdvanceSystemDate() {
 /**
  *
  */
-char GetOneArgument(char *argument, const int state) {
+char GetOneArgument(char *argument, const int mode) {
 	int c, i = 0;
 
 	while ((c = getchar()) != '\n' && c != EOF) {
 		/* ignores trailing white space */
 		if (i == 0 && isspace(c))
 			continue;
-		/* finishes argument when a white space is read if the state is 0 */
-		if (state == 0 && isspace(c))
+		/* finishes argument when a white space is read if the mode is 0 */
+		if (mode == 0 && isspace(c))
 			break;
 		argument[i++] = c;
 	}

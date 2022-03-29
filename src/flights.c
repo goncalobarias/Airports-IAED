@@ -55,17 +55,9 @@ int CheckAddFlightErrors(flight new_flight) {
 						   new_flight.date_departure))
 		return 1;
 
-	/* check arrival id existence */
-	if (GetAirportFromID(new_flight.arrival_id) == -1) {
-		printf(AIRPORT_ERR_NO_ID, new_flight.arrival_id);
-		return 1;
-	}
+	if (CheckAirportExistence(new_flight.arrival_id)) return 1;
 
-	/* check departure id existence */
-	if (GetAirportFromID(new_flight.departure_id) == -1) {
-		printf(AIRPORT_ERR_NO_ID, new_flight.departure_id);
-		return 1;
-	}
+	if (CheckAirportExistence(new_flight.departure_id)) return 1;
 
 	if (totalFlights >= MAX_FLIGHTS) {
 		printf(FLIGHT_ERR_TOO_MANY);
@@ -91,8 +83,8 @@ int CheckAddFlightErrors(flight new_flight) {
 /**
  *
  */
-void AddSortedFlight_departure(flight new_flight) {
-	int first, middle, last, index, i;
+void AddSortedFlight(int sort[], flight new_flight, int mode) {
+	int first, middle, last, comp, index, i;
 
 	if (totalFlights == 0)
 		index = 0;
@@ -101,8 +93,8 @@ void AddSortedFlight_departure(flight new_flight) {
 		last = totalFlights - 1;
 		middle = (first + last) / 2;
 		while (first < last) {
-			if (CompareDates(allFlights[sortedFlights_departure[middle]].date_departure,
-							new_flight.date_departure, 1) < 0)
+			comp = CompareFlightDates(allFlights[sort[middle]], new_flight, mode);
+			if (comp < 0)
 				first = middle + 1;
 			else
 				last = middle - 1;
@@ -110,48 +102,15 @@ void AddSortedFlight_departure(flight new_flight) {
 		}
 
 		index = first + 1;
-		if (CompareDates(allFlights[sortedFlights_departure[first]].date_departure,
-						new_flight.date_departure, 1) > 0)
+		if (CompareFlightDates(allFlights[sort[first]], new_flight,
+								mode) > 0)
 			index -= 1;
 	}
 
 	for (i = totalFlights - 1; i >= index; i--) {
-		sortedFlights_departure[i + 1] = sortedFlights_departure[i];
+		sort[i + 1] = sort[i];
 	}
-	sortedFlights_departure[index] = totalFlights;
-}
-
-/**
- *
- */
-void AddSortedFlight_arrival(flight new_flight) {
-	int first, middle, last, index, i;
-
-	if (totalFlights == 0)
-		index = 0;
-	else {
-		first = 0;
-		last = totalFlights - 1;
-		middle = (first + last) / 2;
-		while (first < last) {
-			if (CompareDates(allFlights[sortedFlights_arrival[middle]].date_arrival,
-							new_flight.date_arrival, 1) < 0)
-				first = middle + 1;
-			else
-				last = middle - 1;
-			middle = (first + last) / 2;
-		}
-
-		index = first + 1;
-		if (CompareDates(allFlights[sortedFlights_arrival[first]].date_arrival,
-						new_flight.date_arrival, 1) > 0)
-			index -= 1;
-	}
-
-	for (i = totalFlights - 1; i >= index; i--) {
-		sortedFlights_arrival[i + 1] = sortedFlights_arrival[i];
-	}
-	sortedFlights_arrival[index] = totalFlights;
+	sort[index] = totalFlights;;
 }
 
 /**
@@ -161,18 +120,10 @@ void ListAllFlights() {
 	int i;
 
 	for (i = 0; i < totalFlights; i++) {
-		printf("%s %s %s", allFlights[i].flight_code,
-		 					allFlights[i].departure_id,
-							allFlights[i].arrival_id);
+		printf(FLIGHT_FULL_PRINT, allFlights[i].flight_code,
+		 						allFlights[i].departure_id,
+								allFlights[i].arrival_id);
 
 		PrintClock(allFlights[i].date_departure);
 	}
-}
-
-/**
- *
- */
-void PrintAirport(airport airport_1) {
-	printf(AIRPORT_PRINT, airport_1.id, airport_1.city, airport_1.country,
- 						airport_1.departures);
 }
