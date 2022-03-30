@@ -15,11 +15,11 @@
 #include "proj1.h"
 
 /* Global variables */
-int totalAirports; 							/* tracks the total amount of airports added by the user */
-int totalFlights; 							/* tracks the total amount of flights added by the user */
-airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
-flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
-int sortedAirports[MAX_AIRPORTS]; 			/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
+int totalAirports; 				/* tracks the total amount of airports added by the user */
+int totalFlights; 				/* tracks the total amount of flights added by the user */
+airport allAirports[MAX_AIRPORTS]; 		/* stores all of the current airports */
+flight allFlights[MAX_FLIGHTS]; 		/* stores all of the current flights */
+int sortedAirports[MAX_AIRPORTS]; 		/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
 int sortedFlights_departure[MAX_FLIGHTS];	/* stores the indexes of all the flights, sorted by departure date and time */
 int sortedFlights_arrival[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by arrival date and time */
 clock global_date = {1, 1, 2022, 0, 0};		/* stores the current date of the system */
@@ -149,7 +149,7 @@ void AddFlight_ListFlights() {
 	new_flight.duration = ReadClock(NO_DATE, duration);
 	new_flight.capacity = atoi(capacity);
 	new_flight.date_arrival = UpdateDate(new_flight.date_departure,
-									  	new_flight.duration);
+							  	new_flight.duration);
 
 	if (CheckAddFlightErrors(new_flight)) return;
 
