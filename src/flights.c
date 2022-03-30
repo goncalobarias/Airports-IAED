@@ -7,7 +7,7 @@
 /**
  *
  */
-int CheckFlightCodeErrors(const char *flight_code, clock date_depart) {
+int CheckFlightCodeErrors(const char flight_code[], clock date_depart) {
 	int i;
 
 	for (i = 0; i < 2; i++) {

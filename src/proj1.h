@@ -1,5 +1,9 @@
 /* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt */
 
+/**
+ * Defines
+ */
+
 /* airports */
 #define ID_LENGTH 4
 #define MAX_COUNTRY_LENGTH 31
@@ -42,7 +46,7 @@
 #define NO_DATE "00-00-0000"
 
 #define DATE_PRINT "%02d-%02d-%04d\n"
-#define FULL_DATE_PRINT " %02d-%02d-%04d %02d:%02d\n"
+#define DATE_FULL_PRINT " %02d-%02d-%04d %02d:%02d\n"
 
 #define DATE_ERR_INVALID "invalid date\n"
 
@@ -50,6 +54,7 @@
  * Structs
  */
 
+/* used for dates and durations of time */
 typedef struct {
 	int day;
 	int month;
@@ -88,6 +93,7 @@ extern int sortedFlights_departure[MAX_FLIGHTS];
 extern int sortedFlights_arrival[MAX_FLIGHTS];
 extern clock global_date;
 extern clock max_date;
+extern const int days_months[MONTHS];
 
 /**
  * Prototypes
@@ -111,17 +117,17 @@ char GetOneArgument(char *argument, const int mode);
 
 /* airports.c */
 
-int CheckAddAirportErrors(const char *id);
+int CheckAddAirportErrors(const char id[]);
 
-int CheckAirportExistence(const char *id);
+int CheckAirportExistence(const char id[]);
 
 void AddSortedAirport(airport airport_1);
 
-int GetAirport(const char *id);
+int GetAirport(const char id[]);
 
 /* flights.c */
 
-int CheckFlightCodeErrors(const char *flight_code, clock date);
+int CheckFlightCodeErrors(const char flight_code[], clock date);
 
 int CheckAddFlightErrors(flight new_flight);
 
@@ -143,6 +149,6 @@ int CompareDates(clock date_1, clock date_2, int mode);
 
 int CompareFlightDates(flight flight_1, flight flight_2, const int mode);
 
-clock ReadClock(char *date, char *time);
+clock ReadClock(char date[], char time[]);
 
 void PrintClock(clock date);

@@ -22,25 +22,24 @@ flight allFlights[MAX_FLIGHTS]; 		/* stores all of the current flights */
 int sortedAirports[MAX_AIRPORTS]; 		/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
 int sortedFlights_departure[MAX_FLIGHTS];	/* stores the indexes of all the flights, sorted by departure date and time */
 int sortedFlights_arrival[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by arrival date and time */
-clock global_date = {1, 1, 2022, 0, 0};		/* stores the current date of the system */
-clock max_date = {1, 1, 2023, 0, 0};		/* stores the date that is one year in future from the current date */
-
+clock global_date = {1, 1, 2022, 0, 0};		/* stores the system date of the system */
+clock max_date = {1, 1, 2023, 0, 0};		/* stores the date that is one year in future from the system date */
+const int days_months[MONTHS] = {31, 28, 31, 30, 	/* stores the amount of days per month in a non leap year */
+								31, 30, 31, 31,
+								30, 31, 30, 31};
 /**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
- * If the "run" variable has a value of 0 the program stops.
+ * Exits program if letter 'q' is inserted.
  */
 int main() {
 	char c;
-	int run = 1;
 
-	while (run) {
-		c = getchar();
+	while ((c = getchar()) != EOF) {
 		switch(c) {
 			case 'q':
-				/* 'q' command stops the program */
-				run = 0;
-				break;
+				/* 'q' command exits the program */
+				exit(0);
 			case 'a':
 				AddAirport();
 				break;
@@ -81,7 +80,6 @@ void AddAirport() {
 
 	/* actually add the aiport to the system */
 	allAirports[totalAirports] = new_airport;
-
 	AddSortedAirport(allAirports[totalAirports]);
 
 	printf(AIRPORT_ADD_PRINT, allAirports[totalAirports].id);
@@ -119,8 +117,8 @@ void ListAirports() {
 
 /**
  * Handles the 'v' command.
- * If no arguments are provided it will print all of the flights in alphabetical
- * order.
+ * If no arguments are provided it will print all of the flights in the order
+ * they were created by.
  * Otherwise, the function adds a new flight to the system with the specified
  * flight code, airport of departure id, airport of arrival id, date of
  * departure, time of departure, duration of flight and capacity of the flight.
@@ -158,6 +156,7 @@ void AddFlight_ListFlights() {
 	AddSortedFlight(sortedFlights_arrival, allFlights[totalFlights], 0);
 	AddSortedFlight(sortedFlights_departure, allFlights[totalFlights], 1);
 
+	/* updates the number of departures on the departure airport */
 	departure_airport = GetAirport(new_flight.departure_id);
 	allAirports[sortedAirports[departure_airport]].departures += 1;
 
@@ -177,6 +176,8 @@ void FlightDeparturesInAirport() {
 	if (CheckAirportExistence(id)) return;
 
 	for (j = 0; j < totalFlights; j++) {
+		/* looks at the sorted flights to find the one linked to the right */
+		/* departure id. */
 		i = sortedFlights_departure[j];
 		if (strcmp(allFlights[i].departure_id, id) == 0) {
 			printf(FLIGHT_PRINT, allFlights[i].flight_code,
@@ -200,6 +201,8 @@ void FlightArrivalsInAirport() {
 	if (CheckAirportExistence(id)) return;
 
 	for (j = 0; j < totalFlights; j++) {
+		/* looks at the sorted flights to find the one linked to the right */
+		/* arrival id. */
 		i = sortedFlights_arrival[j];
 		if (strcmp(allFlights[i].arrival_id, id) == 0) {
 			printf(FLIGHT_PRINT, allFlights[i].flight_code,
@@ -223,14 +226,19 @@ void AdvanceSystemDate() {
 	if (CheckDateErrors(new_date)) return;
 
 	global_date = new_date;
-	max_date = global_date;
+	max_date = new_date;
 	max_date.year += 1; /* sets the max date one year in the future */
 
 	printf(DATE_PRINT, global_date.day, global_date.month, global_date.year);
 }
 
 /**
- *
+ * Reads a single argument from stdin and stores it.
+ * Fetches one argument (characters separated by spaces) from the standard
+ * input and populates the given string with it.
+ * Ignores any trailing white spaces and always stops and a newline or end of file.
+ * If the mode is set to 0 it will fetch for an argument that contains whitespaces
+ * and only end on a newline or end of file.
  */
 char GetOneArgument(char *argument, const int mode) {
 	int c, i = 0;
@@ -240,7 +248,8 @@ char GetOneArgument(char *argument, const int mode) {
 		if (i == 0 && isspace(c)) {
 			continue;
 		}
-		/* finishes argument when a white space is read if the mode is 0 */
+		/* finishes argument when a non trailing white space is read if the */
+		/* mode is 0. */
 		if (mode == 0 && isspace(c)) {
 			break;
 		}

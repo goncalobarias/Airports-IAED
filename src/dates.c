@@ -3,15 +3,12 @@
 #include <stdio.h>
 #include "proj1.h"
 
-/* stores the amount of days per month in a non leap year */
-const int days_months[MONTHS] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
 /**
  *
  */
 int CheckDateErrors(clock date_depart) {
-	if (CompareDates(global_date, date_depart, 1) > 0 ||
-		CompareDates(max_date, date_depart, 0) < 0) {
+	if (CompareDates(global_date, date_depart, 1) > 0
+		|| CompareDates(max_date, date_depart, 0) < 0) {
 		printf(DATE_ERR_INVALID);
 		return 1;
 	}
@@ -25,8 +22,7 @@ int CheckDateErrors(clock date_depart) {
 clock UpdateDate(clock date_departure, clock duration) {
 	int date_departure_mins = ConvertDatesToMins(date_departure);
 	int dur = ConvertDatesToMins(duration);
-	int updated_date_mins = date_departure_mins + dur;
-	int i = 0;
+	int updated_date_mins = date_departure_mins + dur, i = 0;
 	clock date_arrival;
 
 	/* updates the year */
@@ -115,7 +111,7 @@ int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
 /**
  *
  */
-clock ReadClock(char *calendar_date, char *hours_mins) {
+clock ReadClock(char calendar_date[], char hours_mins[]) {
 	clock date_departure;
 	char hifen[1], double_dots[1];
 
@@ -131,6 +127,6 @@ clock ReadClock(char *calendar_date, char *hours_mins) {
 }
 
 void PrintClock(clock date) {
-	printf(FULL_DATE_PRINT, date.day, date.month, date.year, date.hours,
+	printf(DATE_FULL_PRINT, date.day, date.month, date.year, date.hours,
 							date.minutes);
 }

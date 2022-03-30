@@ -7,7 +7,7 @@
 /**
  *
  */
-int CheckAddAirportErrors(const char *id) {
+int CheckAddAirportErrors(const char id[]) {
 	int i, id_len = strlen(id), j = GetAirport(id);
 
 	for (i = 0; i < id_len; i++) {
@@ -31,7 +31,7 @@ int CheckAddAirportErrors(const char *id) {
 /**
  *
  */
-int CheckAirportExistence(const char *id) {
+int CheckAirportExistence(const char id[]) {
 	int i = GetAirport(id);
 
 	if (i == totalAirports ||
@@ -46,7 +46,7 @@ int CheckAirportExistence(const char *id) {
 /**
  *
  */
-int GetAirport(const char *id) {
+int GetAirport(const char id[]) {
 	int left, middle, right, comp;
 
 	if (totalAirports == 0)
