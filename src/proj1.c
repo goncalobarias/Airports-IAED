@@ -15,18 +15,18 @@
 #include "proj1.h"
 
 /* Global variables */
-int totalAirports; 				/* tracks the total amount of airports added by the user */
-int totalFlights; 				/* tracks the total amount of flights added by the user */
-airport allAirports[MAX_AIRPORTS]; 		/* stores all of the current airports */
-flight allFlights[MAX_FLIGHTS]; 		/* stores all of the current flights */
-int sortedAirports[MAX_AIRPORTS]; 		/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
-int sortedFlights_departure[MAX_FLIGHTS];	/* stores the indexes of all the flights, sorted by departure date and time */
-int sortedFlights_arrival[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by arrival date and time */
-clock global_date = {1, 1, 2022, 0, 0};		/* stores the system date of the system */
-clock max_date = {1, 1, 2023, 0, 0};		/* stores the date that is one year in future from the system date */
+int totalAirports; 					/* tracks the total amount of airports added by the user */
+int totalFlights; 					/* tracks the total amount of flights added by the user */
+airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
+flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
+int sortedAirports[MAX_AIRPORTS]; 			/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
+int sortedFlights_departure[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by departure date and time */
+int sortedFlights_arrival[MAX_FLIGHTS];			/* stores the indexes of all the flights, sorted by arrival date and time */
+clock global_date = {1, 1, 2022, 0, 0};			/* stores the system date of the system */
+clock max_date = {1, 1, 2023, 0, 0};			/* stores the date that is one year in future from the system date */
 const int days_months[MONTHS] = {31, 28, 31, 30, 	/* stores the amount of days per month in a non leap year */
-								31, 30, 31, 31,
-								30, 31, 30, 31};
+					31, 30, 31, 31,
+					30, 31, 30, 31};
 /**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
