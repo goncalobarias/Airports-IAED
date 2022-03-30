@@ -27,7 +27,6 @@
 #define FLIGHT_ERR_INVALID "invalid flight code\n"
 #define FLIGHT_ERR_DUPLICATE "flight already exists\n"
 #define FLIGHT_ERR_TOO_MANY "too many flights\n"
-#define FLIGHT_ERR_INVALID_DATE "invalid date\n"
 #define FLIGHT_ERR_INVALID_DURATION "invalid duration\n"
 #define FLIGHT_ERR_INVALID_CAPACITY "invalid capacity\n"
 
@@ -44,6 +43,8 @@
 
 #define DATE_PRINT "%02d-%02d-%04d\n"
 #define FULL_DATE_PRINT " %02d-%02d-%04d %02d:%02d\n"
+
+#define DATE_ERR_INVALID "invalid date\n"
 
 /**
  * Structs
@@ -110,21 +111,21 @@ char GetOneArgument(char *argument, const int mode);
 
 /* airports.c */
 
-int CheckAddAirportErrors(char *id);
+int CheckAddAirportErrors(const char *id);
 
-int CheckAirportExistence(char *id);
+int CheckAirportExistence(const char *id);
 
 void AddSortedAirport(airport airport_1);
 
-int GetAirport(char *id);
+int GetAirport(const char *id);
 
 /* flights.c */
 
-int CheckFlightCodeErrors(char *flight_code, clock date);
+int CheckFlightCodeErrors(const char *flight_code, clock date);
 
 int CheckAddFlightErrors(flight new_flight);
 
-void AddSortedFlight(int sort[], flight new_flight, int mode);
+void AddSortedFlight(int sort[], flight new_flight, const int mode);
 
 void ListAllFlights();
 
@@ -140,7 +141,7 @@ int ConvertDatesToMins(clock date);
 
 int CompareDates(clock date_1, clock date_2, int mode);
 
-int CompareFlightDates(flight flight_1, flight flight_2, int mode);
+int CompareFlightDates(flight flight_1, flight flight_2, const int mode);
 
 clock ReadClock(char *date, char *time);
 

@@ -101,8 +101,9 @@ void ListAirports() {
 
 	/* if there is no arguments it lists all airports */
 	if (getchar() == '\n') {
-		for (i = 0; i < totalAirports; i++)
+		for (i = 0; i < totalAirports; i++) {
 			PrintAirport(allAirports[sortedAirports[i]]);
+		}
 		return;
 	}
 
@@ -126,8 +127,8 @@ void ListAirports() {
  */
 void AddFlight_ListFlights() {
 	flight new_flight;
-	char date[DATE_LENGTH], time[TIME_LENGTH], duration[TIME_LENGTH];
-	char capacity[MAX_CAPACITY_LENGTH];
+	char date[DATE_LENGTH], time[TIME_LENGTH];
+	char duration[TIME_LENGTH], capacity[MAX_CAPACITY_LENGTH];
 	int departure_airport;
 
 	/* if there is no arguments it lists all flights */
@@ -154,7 +155,6 @@ void AddFlight_ListFlights() {
 
 	/* actually add the flight to the system */
 	allFlights[totalFlights] = new_flight;
-
 	AddSortedFlight(sortedFlights_arrival, allFlights[totalFlights], 0);
 	AddSortedFlight(sortedFlights_departure, allFlights[totalFlights], 1);
 
@@ -237,11 +237,13 @@ char GetOneArgument(char *argument, const int mode) {
 
 	while ((c = getchar()) != '\n' && c != EOF) {
 		/* ignores trailing white space */
-		if (i == 0 && isspace(c))
+		if (i == 0 && isspace(c)) {
 			continue;
+		}
 		/* finishes argument when a white space is read if the mode is 0 */
-		if (mode == 0 && isspace(c))
+		if (mode == 0 && isspace(c)) {
 			break;
+		}
 		argument[i++] = c;
 	}
 	argument[i] = '\0';

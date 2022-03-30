@@ -1,14 +1,13 @@
 /* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "proj1.h"
 
 /**
  *
  */
-int CheckFlightCodeErrors(char *flight_code, clock date_depart) {
+int CheckFlightCodeErrors(const char *flight_code, clock date_depart) {
 	int i;
 
 	for (i = 0; i < 2; i++) {
@@ -52,8 +51,9 @@ int CheckAddFlightErrors(flight new_flight) {
 	int dur = ConvertDatesToMins(new_flight.duration);
 
 	if (CheckFlightCodeErrors(new_flight.flight_code,
-						   new_flight.date_departure))
+						   new_flight.date_departure)) {
 		return 1;
+	}
 
 	if (CheckAirportExistence(new_flight.arrival_id)) return 1;
 
@@ -83,12 +83,12 @@ int CheckAddFlightErrors(flight new_flight) {
 /**
  *
  */
-void AddSortedFlight(int sort[], flight new_flight, int mode) {
+void AddSortedFlight(int sort[], flight new_flight, const int mode) {
 	int first, middle, last, comp, index, i;
 
-	if (totalFlights == 0)
+	if (totalFlights == 0) {
 		index = 0;
-	else {
+	} else {
 		first = 0;
 		last = totalFlights - 1;
 		middle = (first + last) / 2;

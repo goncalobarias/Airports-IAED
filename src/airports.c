@@ -7,14 +7,15 @@
 /**
  *
  */
-int CheckAddAirportErrors(char *id) {
+int CheckAddAirportErrors(const char *id) {
 	int i, id_len = strlen(id), j = GetAirport(id);
 
-	for (i = 0; i < id_len; i++)
+	for (i = 0; i < id_len; i++) {
 		if (id[i] < 'A' || id[i] > 'Z') {
 			printf(AIRPORT_ERR_INVALID);
 			return 1;
 		}
+	}
 	if (totalAirports >= MAX_AIRPORTS) {
 		printf(AIRPORT_ERR_TOO_MANY);
 		return 1;
@@ -30,7 +31,7 @@ int CheckAddAirportErrors(char *id) {
 /**
  *
  */
-int CheckAirportExistence(char *id) {
+int CheckAirportExistence(const char *id) {
 	int i = GetAirport(id);
 
 	if (i == totalAirports ||
@@ -45,7 +46,7 @@ int CheckAirportExistence(char *id) {
 /**
  *
  */
-int GetAirport(char *id) {
+int GetAirport(const char *id) {
 	int left, middle, right, comp;
 
 	if (totalAirports == 0)
@@ -78,8 +79,9 @@ void AddSortedAirport(airport airport_1) {
 
 	index = GetAirport(airport_1.id);
 
-	for (i = totalAirports - 1; i >= index; i--)
+	for (i = totalAirports - 1; i >= index; i--) {
 		sortedAirports[i + 1] = sortedAirports[i];
+	}
 	sortedAirports[index] = totalAirports;
 }
 

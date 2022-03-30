@@ -12,7 +12,7 @@ const int days_months[MONTHS] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 int CheckDateErrors(clock date_depart) {
 	if (CompareDates(global_date, date_depart, 1) > 0 ||
 		CompareDates(max_date, date_depart, 0) < 0) {
-		printf(FLIGHT_ERR_INVALID_DATE);
+		printf(DATE_ERR_INVALID);
 		return 1;
 	}
 
@@ -57,19 +57,22 @@ int ConvertDatesToMins(clock formatted_date) {
 	int mins = 0, i, year_difference;
 
 	/* calculates the year in minutes */
-	if (formatted_date.year > 0)
+	if (formatted_date.year > 0) {
 		year_difference = formatted_date.year - 2022;
-	else
+	} else {
 		year_difference = 0;
+	}
 	mins += (year_difference * MINS_YEAR);
 
 	/* calculates the month in minutes */
-	for (i = 0; i < formatted_date.month - 1; i++)
+	for (i = 0; i < formatted_date.month - 1; i++) {
 		mins += days_months[i] * MINS_DAY;
+	}
 
 	/* calculats the day in minutes */
-	if (formatted_date.day > 0)
+	if (formatted_date.day > 0) {
 		mins += (formatted_date.day - 1) * MINS_DAY;
+	}
 
 	/* calculates the hour in minutes and adds the rest into minutes */
 	mins += formatted_date.hours * MINS_HOUR;
@@ -81,17 +84,19 @@ int ConvertDatesToMins(clock formatted_date) {
 /**
  *
  */
-int CompareDates(clock date_1, clock date_2, int mode) {
+int CompareDates(clock date_1, clock date_2, const int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
 	int date_2_mins = ConvertDatesToMins(date_2);
 
-	if (date_1_mins == date_2_mins)
+	if (date_1_mins == date_2_mins) {
 		return 0;
+	}
 
 	if (mode == 0 && (date_1_mins - date_2_mins < MINS_DAY
-		|| date_1_mins - date_2_mins > -MINS_DAY) && date_1.day == date_2.day
-		&& date_1.year == date_2.year)
+		|| date_1_mins - date_2_mins > -MINS_DAY)
+		&& date_1.day == date_2.day && date_1.year == date_2.year) {
 		return 0;
+	}
 
 	return (date_2_mins < date_1_mins ? 1 : -1);
 }
@@ -99,11 +104,12 @@ int CompareDates(clock date_1, clock date_2, int mode) {
 /**
  *
  */
-int CompareFlightDates(flight flight_1, flight flight_2, int mode) {
-	if (mode == 0)
+int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
+	if (mode == 0) {
 		return CompareDates(flight_1.date_arrival, flight_2.date_arrival, 1);
-	else
+	} else {
 		return CompareDates(flight_1.date_departure, flight_2.date_departure, 1);
+	}
 }
 
 /**
