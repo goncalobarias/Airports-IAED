@@ -15,18 +15,18 @@
 #include "proj1.h"
 
 /* Global variables */
-int totalAirports; 					/* tracks the total amount of airports added by the user */
-int totalFlights; 					/* tracks the total amount of flights added by the user */
-airport allAirports[MAX_AIRPORTS]; 			/* stores all of the current airports */
-flight allFlights[MAX_FLIGHTS]; 			/* stores all of the current flights */
-int sortedAirports[MAX_AIRPORTS]; 			/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
-int sortedFlights_departure[MAX_FLIGHTS];		/* stores the indexes of all the flights, sorted by departure date and time */
-int sortedFlights_arrival[MAX_FLIGHTS];			/* stores the indexes of all the flights, sorted by arrival date and time */
-clock global_date = {1, 1, 2022, 0, 0};			/* stores the system date of the system */
-clock max_date = {1, 1, 2023, 0, 0};			/* stores the date that is one year in future from the system date */
+int totalAirports; 									/* tracks the total amount of airports added by the user */
+int totalFlights; 									/* tracks the total amount of flights added by the user */
+airport allAirports[MAX_AIRPORTS]; 					/* stores all of the current airports */
+flight allFlights[MAX_FLIGHTS]; 					/* stores all of the current flights */
+int sortedAirports[MAX_AIRPORTS]; 					/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
+int sortedFlights_departure[MAX_FLIGHTS];			/* stores the indexes of all the flights, sorted by departure date and time */
+int sortedFlights_arrival[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by arrival date and time */
+clock global_date = {1, 1, 2022, 0, 0};				/* stores the system date of the system */
+clock max_date = {1, 1, 2023, 0, 0};				/* stores the date that is one year in future from the system date */
 const int days_months[MONTHS] = {31, 28, 31, 30, 	/* stores the amount of days per month in a non leap year */
-					31, 30, 31, 31,
-					30, 31, 30, 31};
+								31, 30, 31, 31,
+								30, 31, 30, 31};
 /**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
@@ -76,13 +76,15 @@ void AddAirport() {
 	GetOneArgument(new_airport.city, 1);
 	new_airport.departures = 0;
 
-	if (CheckAddAirportErrors(new_airport.id)) return;
+	if (CheckAddAirportErrors(new_airport.id)) {
+		return;
+	}
 
 	/* actually add the aiport to the system */
 	allAirports[totalAirports] = new_airport;
-	AddSortedAirport(allAirports[totalAirports]);
+	AddSortedAirport(new_airport);
 
-	printf(AIRPORT_ADD_PRINT, allAirports[totalAirports].id);
+	printf(AIRPORT_ADD_PRINT, new_airport.id);
 
 	totalAirports++;
 }
@@ -90,7 +92,7 @@ void AddAirport() {
 /**
  * Handles the 'l' command.
  * If no arguments are provided it will print all of the airports in
- * alphabetical order.
+ * alphabetical order of their ids.
  * Otherwise, the function prints the airports with the specified IDs.
  */
 void ListAirports() {
@@ -108,7 +110,10 @@ void ListAirports() {
 	do {
 		state = GetOneArgument(id, 0);
 
-		if (CheckAirportExistence(id)) continue;
+		if (CheckAirportExistence(id)) {
+			printf(AIRPORT_ERR_NO_ID, id);
+			continue;
+		}
 		i = GetAirport(id);
 
 		PrintAirport(allAirports[sortedAirports[i]]);
@@ -120,8 +125,8 @@ void ListAirports() {
  * If no arguments are provided it will print all of the flights in the order
  * they were created by.
  * Otherwise, the function adds a new flight to the system with the specified
- * flight code, airport of departure id, airport of arrival id, date of
- * departure, time of departure, duration of flight and capacity of the flight.
+ * flight code, id of departure airport, id of arrival aiport, date of
+ * departure, duration of flight, date of arrival and capacity of the flight.
  */
 void AddFlight_ListFlights() {
 	flight new_flight;
@@ -147,18 +152,20 @@ void AddFlight_ListFlights() {
 	new_flight.duration = ReadClock(NO_DATE, duration);
 	new_flight.capacity = atoi(capacity);
 	new_flight.date_arrival = UpdateDate(new_flight.date_departure,
-							  	new_flight.duration);
+							  	new_flight.duration); /* gets the arrival date and time */
 
-	if (CheckAddFlightErrors(new_flight)) return;
+	if (CheckAddFlightErrors(new_flight)) {
+		return;
+	}
 
 	/* actually add the flight to the system */
 	allFlights[totalFlights] = new_flight;
-	AddSortedFlight(sortedFlights_arrival, allFlights[totalFlights], 0);
-	AddSortedFlight(sortedFlights_departure, allFlights[totalFlights], 1);
+	AddSortedFlight(sortedFlights_arrival, new_flight, 0);
+	AddSortedFlight(sortedFlights_departure, new_flight, 1);
 
 	/* updates the number of departures on the departure airport */
 	departure_airport = GetAirport(new_flight.departure_id);
-	allAirports[sortedAirports[departure_airport]].departures += 1;
+	allAirports[sortedAirports[departure_airport]].departures++;
 
 	totalFlights++;
 }
@@ -173,10 +180,13 @@ void FlightDeparturesInAirport() {
 	int j, i;
 
 	GetOneArgument(id, 0);
-	if (CheckAirportExistence(id)) return;
+	if (CheckAirportExistence(id)) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return;
+	}
 
 	for (j = 0; j < totalFlights; j++) {
-		/* looks at the sorted flights to find the one linked to the right */
+		/* looks at the sorted flights to find the ones linked to the right */
 		/* departure id. */
 		i = sortedFlights_departure[j];
 		if (strcmp(allFlights[i].departure_id, id) == 0) {
@@ -198,10 +208,13 @@ void FlightArrivalsInAirport() {
 	int j, i;
 
 	GetOneArgument(id, 0);
-	if (CheckAirportExistence(id)) return;
+	if (CheckAirportExistence(id)) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return;
+	}
 
 	for (j = 0; j < totalFlights; j++) {
-		/* looks at the sorted flights to find the one linked to the right */
+		/* looks at the sorted flights to find the ones linked to the right */
 		/* arrival id. */
 		i = sortedFlights_arrival[j];
 		if (strcmp(allFlights[i].arrival_id, id) == 0) {
@@ -215,7 +228,7 @@ void FlightArrivalsInAirport() {
 
 /**
  * Handles the 't' command.
- * Forwards the date of the system.
+ * Forwards the date of the system and sets the max date of the system.
  */
 void AdvanceSystemDate() {
 	char date[DATE_LENGTH];
@@ -223,7 +236,9 @@ void AdvanceSystemDate() {
 
 	GetOneArgument(date, 0);
 	new_date = ReadClock(date, START_DAY);
-	if (CheckDateErrors(new_date)) return;
+	if (CheckDateErrors(new_date)) {
+		return;
+	}
 
 	global_date = new_date;
 	max_date = new_date;
@@ -236,7 +251,7 @@ void AdvanceSystemDate() {
  * Reads a single argument from stdin and stores it.
  * Fetches one argument (characters separated by spaces) from the standard
  * input and populates the given string with it.
- * Ignores any trailing white spaces and always stops and a newline or end of file.
+ * Ignores any trailing white spaces and always stops at a newline or end of file.
  * If the mode is set to 0 it will fetch for an argument that contains whitespaces
  * and only end on a newline or end of file.
  */
@@ -257,5 +272,5 @@ char GetOneArgument(char *argument, const int mode) {
 	}
 	argument[i] = '\0';
 
-	return (c != '\n' ? 0 : 1);
+	return (c != '\n' ? 0 : 1); /* returns a 0 when it reads the last argument */
 }

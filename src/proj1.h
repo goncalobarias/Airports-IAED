@@ -121,9 +121,11 @@ int CheckAddAirportErrors(const char id[]);
 
 int CheckAirportExistence(const char id[]);
 
+int GetAirport(const char id[]);
+
 void AddSortedAirport(airport airport_1);
 
-int GetAirport(const char id[]);
+void PrintAirport(airport airport_1);
 
 /* flights.c */
 
@@ -134,8 +136,6 @@ int CheckAddFlightErrors(flight new_flight);
 void AddSortedFlight(int sort[], flight new_flight, const int mode);
 
 void ListAllFlights();
-
-void PrintAirport(airport airport_1);
 
 /* dates.c */
 

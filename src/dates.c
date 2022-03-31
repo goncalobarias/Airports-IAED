@@ -4,7 +4,9 @@
 #include "proj1.h"
 
 /**
- *
+ * Checks if the date is not in the past or one year in the future.
+ * If it's invalid it returns 1, otherwise it returns 0.
+ * Auxiliary function of the 't' command.
  */
 int CheckDateErrors(clock date_depart) {
 	if (CompareDates(global_date, date_depart, 1) > 0
@@ -17,7 +19,9 @@ int CheckDateErrors(clock date_depart) {
 }
 
 /**
- *
+ * Updates a date it receives with a certain duration.
+ * Transforms the date and duration into minutes and adds them up, then it
+ * converts the new date in minutes into a proper formatted date.
  */
 clock UpdateDate(clock date_departure, clock duration) {
 	int date_departure_mins = ConvertDatesToMins(date_departure);
@@ -47,7 +51,10 @@ clock UpdateDate(clock date_departure, clock duration) {
 }
 
 /**
- *
+ * Calculates the date it receives in minutes relative to the start of the
+ * program (01-01-2022). If the date is before the start of the program the
+ * number will be negative. Is also used to convert arbitrary durations of
+ * time into minutes.
  */
 int ConvertDatesToMins(clock formatted_date) {
 	int mins = 0, i, year_difference;
@@ -55,7 +62,7 @@ int ConvertDatesToMins(clock formatted_date) {
 	/* calculates the year in minutes */
 	if (formatted_date.year > 0) {
 		year_difference = formatted_date.year - 2022;
-	} else {
+	} else { /* ignores year differences if it's converting durations */
 		year_difference = 0;
 	}
 	mins += (year_difference * MINS_YEAR);
@@ -78,7 +85,10 @@ int ConvertDatesToMins(clock formatted_date) {
 }
 
 /**
- *
+ * Transforms two dates into minutes and compares them.
+ * If the mode is set to 0, it will compare the dates by day instead of minutes.
+ * Returns 1 if the second date is bigger then the first on, 0 if both are equal
+ * dates or -1 if the first date is bigger then the second.
  */
 int CompareDates(clock date_1, clock date_2, const int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
@@ -88,6 +98,7 @@ int CompareDates(clock date_1, clock date_2, const int mode) {
 		return 0;
 	}
 
+	/* if the mode is 0, two dates will be equal if they are on the same day */
 	if (mode == 0 && (date_1_mins - date_2_mins < MINS_DAY
 		|| date_1_mins - date_2_mins > -MINS_DAY)
 		&& date_1.day == date_2.day && date_1.year == date_2.year) {
@@ -98,7 +109,10 @@ int CompareDates(clock date_1, clock date_2, const int mode) {
 }
 
 /**
- *
+ * Used as a proxy function to the CompareDates function. Receives two
+ * flights and compares the dates of the two flights depending on the mode it
+ * receives. If the mode is 0, it will compare the flights based on their
+ * arrival date, otherwise it will compare them based on their departure date.
  */
 int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
 	if (mode == 0) {
@@ -109,23 +123,27 @@ int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
 }
 
 /**
- *
+ * Reads the clock and retrives a date or a duration. If it receives the calendar
+ * date 00-00-0000 (NO_DATE) then it will retrive a duration, otherwise it will
+ * retrive a proper formatted date.
  */
 clock ReadClock(char calendar_date[], char hours_mins[]) {
-	clock date_departure;
+	clock date;
 	char hifen[1], double_dots[1];
 
 	/* reads the calendar date */
-	sscanf(calendar_date, "%d%c%d%c%d", &date_departure.day, hifen,
-						&date_departure.month, hifen, &date_departure.year);
+	sscanf(calendar_date, "%d%c%d%c%d", &date.day, hifen, &date.month, hifen,
+										&date.year);
 
 	/* reads the time */
-	sscanf(hours_mins, "%d%c%d", &date_departure.hours, double_dots,
-						&date_departure.minutes);
+	sscanf(hours_mins, "%d%c%d", &date.hours, double_dots, &date.minutes);
 
-	return date_departure;
+	return date;
 }
 
+/**
+ * Receives a date and prints it in a proper formatted way.
+ */
 void PrintClock(clock date) {
 	printf(DATE_FULL_PRINT, date.day, date.month, date.year, date.hours,
 							date.minutes);
