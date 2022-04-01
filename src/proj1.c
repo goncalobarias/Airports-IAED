@@ -67,7 +67,7 @@ int handle_commands() {
 			return 1;
 		default:
 			/* ignore all unknown commands */
-			return 1;
+			return ;
 	}
 }
 
