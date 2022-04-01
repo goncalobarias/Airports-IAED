@@ -20,7 +20,7 @@ int CheckDateErrors(clock date_depart) {
 
 /**
  * Updates a date it receives with a certain duration.
- * Transforms the date and duration into minutes and adds them up, then it
+ * Transforms the date into minutes and adds the duration to it, then it
  * converts the new date in minutes into a proper formatted date.
  */
 clock UpdateDate(clock date_departure, int duration) {
@@ -52,8 +52,7 @@ clock UpdateDate(clock date_departure, int duration) {
 /**
  * Calculates the date it receives in minutes relative to the start of the
  * program (01-01-2022). If the date is before the start of the program the
- * number will be negative. Is also used to convert arbitrary durations of
- * time into minutes.
+ * number will be negative.
  */
 int ConvertDatesToMins(clock formatted_date) {
 	int mins = 0, i, year_difference;
@@ -61,7 +60,7 @@ int ConvertDatesToMins(clock formatted_date) {
 	/* calculates the year in minutes */
 	if (formatted_date.year > 0) {
 		year_difference = formatted_date.year - 2022;
-	} else { /* ignores year differences if it's converting durations */
+	} else {
 		year_difference = 0;
 	}
 	mins += (year_difference * MINS_YEAR);
@@ -98,8 +97,7 @@ int CompareDates(clock date_1, clock date_2, const int mode) {
 	}
 
 	/* if the mode is 0, two dates will be equal if they are on the same day */
-	if (mode == 0 && (date_1_mins - date_2_mins < MINS_DAY
-		|| date_1_mins - date_2_mins > -MINS_DAY)
+	if (mode == 0 && date_1.month == date_2.month
 		&& date_1.day == date_2.day && date_1.year == date_2.year) {
 		return 0;
 	}
@@ -117,7 +115,8 @@ int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
 	if (mode == 0) {
 		return CompareDates(flight_1.date_arrival, flight_2.date_arrival, 1);
 	} else {
-		return CompareDates(flight_1.date_departure, flight_2.date_departure, 1);
+		return CompareDates(flight_1.date_departure, flight_2.date_departure,
+							1);
 	}
 }
 

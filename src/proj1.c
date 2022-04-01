@@ -9,7 +9,6 @@
 *--------------------------------------------------------------------*/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include "proj1.h"
@@ -27,41 +26,49 @@ clock max_date = {1, 1, 2023, 0, 0};				/* stores the date that is one year in f
 const int days_months[MONTHS] = {31, 28, 31, 30, 	/* stores the amount of days per month in a non leap year */
 								31, 30, 31, 31,
 								30, 31, 30, 31};
-/**
- * Handles command input.
- * Reads one letter inserted by the user and executes the right command.
- * Exits program if letter 'q' is inserted.
- */
-int main() {
-	char c;
 
-	while ((c = getchar()) != EOF) {
-		switch(c) {
-			case 'q':
-				/* 'q' command exits the program */
-				exit(0);
-			case 'a':
-				AddAirport();
-				break;
-			case 'l':
-				ListAirports();
-				break;
-			case 'v':
-				AddFlight_ListFlights();
-				break;
-			case 'p':
-				FlightDeparturesInAirport();
-				break;
-			case 'c':
-				FlightArrivalsInAirport();
-				break;
-			case 't':
-				AdvanceSystemDate();
-				break;
-		}
+int main() {
+	/* executes the program until the user inserts the 'q' command */
+	while (handle_commands()) {
 	}
 
 	return 0;
+}
+
+/**
+ * Handles command input.
+ * Reads one letter inserted by the user and executes the right command.
+ * Returns 1 if the program should continue, otherwise it returns 0 in
+ * order to exit the program.
+ */
+int handle_commands() {
+	char command = getchar();
+	switch(command) {
+		case 'q':
+			/* 'q' command exits the program */
+			return 0;
+		case 'a':
+			AddAirport();
+			return 1;
+		case 'l':
+			ListAirports();
+			return 1;
+		case 'v':
+			AddFlight_ListFlights();
+			return 1;
+		case 'p':
+			FlightDeparturesInAirport();
+			return 1;
+		case 'c':
+			FlightArrivalsInAirport();
+			return 1;
+		case 't':
+			AdvanceSystemDate();
+			return 1;
+		default:
+			/* ignore all unknown commands */
+			return 1;
+	}
 }
 
 /**
@@ -71,10 +78,7 @@ int main() {
 void AddAirport() {
 	airport new_airport;
 
-	GetOneArgument(new_airport.id, 0);
-	GetOneArgument(new_airport.country, 0);
-	GetOneArgument(new_airport.city, 1);
-	new_airport.departures = 0;
+	ReadAirport(&new_airport);
 
 	if (CheckAddAirportErrors(new_airport.id)) {
 		return;
@@ -101,9 +105,7 @@ void ListAirports() {
 
 	/* if there is no arguments it lists all airports */
 	if (getchar() == '\n') {
-		for (i = 0; i < totalAirports; i++) {
-			PrintAirport(allAirports[sortedAirports[i]]);
-		}
+		ListAllAirports();
 		return;
 	}
 
@@ -125,13 +127,10 @@ void ListAirports() {
  * If no arguments are provided it will print all of the flights in the order
  * they were created by.
  * Otherwise, the function adds a new flight to the system with the specified
- * flight code, id of departure airport, id of arrival aiport, date of
- * departure, duration of flight, date of arrival and capacity of the flight.
+ * information.
  */
 void AddFlight_ListFlights() {
 	flight new_flight;
-	char date[DATE_LENGTH], time[TIME_LENGTH];
-	char duration[TIME_LENGTH], capacity[MAX_CAPACITY_LENGTH];
 	int departure_airport;
 
 	/* if there is no arguments it lists all flights */
@@ -140,19 +139,7 @@ void AddFlight_ListFlights() {
 		return;
 	}
 
-	GetOneArgument(new_flight.flight_code, 0);
-	GetOneArgument(new_flight.departure_id, 0);
-	GetOneArgument(new_flight.arrival_id, 0);
-	GetOneArgument(date, 0);
-	GetOneArgument(time, 0);
-	GetOneArgument(duration, 0);
-	GetOneArgument(capacity, 0);
-
-	new_flight.date_departure = ReadClock(date, time);
-	new_flight.duration = ReadDuration(duration);
-	new_flight.capacity = atoi(capacity);
-	new_flight.date_arrival = UpdateDate(new_flight.date_departure,
-							  	new_flight.duration); /* gets the arrival date and time */
+	ReadFlight(&new_flight);
 
 	if (CheckAddFlightErrors(new_flight)) {
 		return;
@@ -187,7 +174,7 @@ void FlightDeparturesInAirport() {
 
 	for (j = 0; j < totalFlights; j++) {
 		/* looks at the sorted flights to find the ones linked to the right */
-		/* departure id. */
+		/* departure id */
 		i = sortedFlights_departure[j];
 		if (strcmp(allFlights[i].departure_id, id) == 0) {
 			printf(FLIGHT_PRINT, allFlights[i].flight_code,
@@ -215,7 +202,7 @@ void FlightArrivalsInAirport() {
 
 	for (j = 0; j < totalFlights; j++) {
 		/* looks at the sorted flights to find the ones linked to the right */
-		/* arrival id. */
+		/* arrival id */
 		i = sortedFlights_arrival[j];
 		if (strcmp(allFlights[i].arrival_id, id) == 0) {
 			printf(FLIGHT_PRINT, allFlights[i].flight_code,
@@ -236,6 +223,7 @@ void AdvanceSystemDate() {
 
 	GetOneArgument(date, 0);
 	new_date = ReadClock(date, START_DAY);
+
 	if (CheckDateErrors(new_date)) {
 		return;
 	}
@@ -256,7 +244,8 @@ void AdvanceSystemDate() {
  * and only end on a newline or end of file.
  */
 char GetOneArgument(char *argument, const int mode) {
-	int c, i = 0;
+	int i = 0;
+	char c;
 
 	while ((c = getchar()) != '\n' && c != EOF) {
 		/* ignores trailing white space */
@@ -264,7 +253,7 @@ char GetOneArgument(char *argument, const int mode) {
 			continue;
 		}
 		/* finishes argument when a non trailing white space is read if the */
-		/* mode is 0. */
+		/* mode is 0 */
 		if (mode == 0 && isspace(c)) {
 			break;
 		}
@@ -272,5 +261,5 @@ char GetOneArgument(char *argument, const int mode) {
 	}
 	argument[i] = '\0';
 
-	return (c != '\n' ? 0 : 1); /* returns a 0 when it reads the last argument */
+	return (c != '\n' ? 0 : 1); /* returns a 1 when it reads the last argument */
 }

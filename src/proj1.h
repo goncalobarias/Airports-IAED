@@ -99,6 +99,8 @@ extern const int days_months[MONTHS];
 
 /* proj1.c */
 
+int handle_commands();
+
 void AddAirport();
 
 void ListAirports();
@@ -115,6 +117,8 @@ char GetOneArgument(char *argument, const int mode);
 
 /* airports.c */
 
+void ReadAirport(airport *new_airport);
+
 int CheckAddAirportErrors(const char id[]);
 
 int CheckAirportExistence(const char id[]);
@@ -123,13 +127,17 @@ int GetAirport(const char id[]);
 
 void AddSortedAirport(airport airport_1);
 
+void ListAllAirports();
+
 void PrintAirport(airport airport_1);
 
 /* flights.c */
 
-int CheckFlightCodeErrors(const char flight_code[], clock date);
+void ReadFlight(flight *new_flight);
 
 int CheckAddFlightErrors(flight new_flight);
+
+int CheckFlightCodeErrors(const char flight_code[], clock date);
 
 void AddSortedFlight(int sort[], flight new_flight, const int mode);
 

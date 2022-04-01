@@ -5,6 +5,17 @@
 #include "proj1.h"
 
 /**
+ * Uses the GetOneArgument function to read all of the arguments from stdin that
+ * create an airport. Starts the number of departures of the new airport at 0.
+ */
+void ReadAirport(airport *new_airport) {
+	GetOneArgument(new_airport->id, 0);
+	GetOneArgument(new_airport->country, 0);
+	GetOneArgument(new_airport->city, 1);
+	new_airport->departures = 0;
+}
+
+/**
  * Checks if the airport id that it receives is valid.
  * If so, it returns 0, otherwise it returns 1.
  * Auxiliary function of the 'a' command.
@@ -87,6 +98,17 @@ void AddSortedAirport(airport airport_1) {
 		sortedAirports[i + 1] = sortedAirports[i];
 	}
 	sortedAirports[index] = totalAirports;
+}
+
+/**
+ * Lists all of the airports sorted by their id in alphabetical order.
+ */
+void ListAllAirports() {
+	int i;
+
+	for (i = 0; i < totalAirports; i++) {
+		PrintAirport(allAirports[sortedAirports[i]]);
+	}
 }
 
 /**

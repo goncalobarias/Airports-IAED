@@ -1,49 +1,31 @@
 /* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "proj1.h"
 
 /**
- * Checks if the flight code it receives is valid.
- * If so, it returns 0, otherwise it returns 1.
- * Auxiliary function of the 'v' command and the CheckAddFlightErrors function.
+ * Uses the GetOneArgument function to read all of the arguments from stdin that
+ * create a flight. It transforms some of the arguments into their appropriate form.
  */
-int CheckFlightCodeErrors(const char flight_code[], clock date_depart) {
-	int i;
+void ReadFlight(flight *new_flight) {
+	char date[DATE_LENGTH], time[TIME_LENGTH];
+	char duration[TIME_LENGTH], capacity[MAX_CAPACITY_LENGTH];
 
-	for (i = 0; i < 2; i++) {
-		if (flight_code[i] < 'A' || flight_code[i] > 'Z') {
-			printf(FLIGHT_ERR_INVALID); /* it doesn't start with two uppercase letters */
-			return 1;
-		}
-	}
+	GetOneArgument(new_flight->flight_code, 0);
+	GetOneArgument(new_flight->departure_id, 0);
+	GetOneArgument(new_flight->arrival_id, 0);
+	GetOneArgument(date, 0);
+	GetOneArgument(time, 0);
+	GetOneArgument(duration, 0);
+	GetOneArgument(capacity, 0);
 
-	while (flight_code[i] != '\0') {
-		if (i == 2 && flight_code[i] == '0') {
-			printf(FLIGHT_ERR_INVALID); /* the digits start with a zero */
-			return 1;
-		}
-		if (flight_code[i] < '0' || flight_code[i] > '9') {
-			printf(FLIGHT_ERR_INVALID); /* the digits are invalid */
-			return 1;
-		}
-		if (i >= 6) {
-			printf(FLIGHT_ERR_INVALID); /* length of flight code is too big */
-			return 1;
-		}
-		i++;
-	}
-
-	for (i = 0; i < totalFlights; i++) {
-		if (strcmp(allFlights[i].flight_code, flight_code) == 0 &&
-			CompareDates(allFlights[i].date_departure, date_depart, 0) == 0) {
-			printf(FLIGHT_ERR_DUPLICATE); /* another flight exists on the same day with the same code */
-			return 1;
-		}
-	}
-
-	return 0;
+	new_flight->date_departure = ReadClock(date, time);
+	new_flight->duration = ReadDuration(duration);
+	new_flight->capacity = atoi(capacity);
+	new_flight->date_arrival = UpdateDate(new_flight->date_departure,
+							  	new_flight->duration); /* gets the arrival date and time */
 }
 
 /**
@@ -72,7 +54,9 @@ int CheckAddFlightErrors(flight new_flight) {
 		return 1;
 	}
 
-	if (CheckDateErrors(new_flight.date_departure)) return 1;
+	if (CheckDateErrors(new_flight.date_departure)) {
+		return 1;
+	}
 
 	if (new_flight.duration > MAX_DURATION) {
 		printf(FLIGHT_ERR_INVALID_DURATION);
@@ -83,6 +67,49 @@ int CheckAddFlightErrors(flight new_flight) {
 		|| new_flight.capacity < MIN_PASSENGERS) {
 		printf(FLIGHT_ERR_INVALID_CAPACITY);
 		return 1;
+	}
+
+	return 0;
+}
+
+/**
+ * Checks if the flight code it receives is valid.
+ * If so, it returns 0, otherwise it returns 1.
+ * Auxiliary function of the 'v' command and the CheckAddFlightErrors function.
+ */
+int CheckFlightCodeErrors(const char flight_code[], clock date_depart) {
+	int i;
+
+	for (i = 0; i < 2; i++) {
+		if (flight_code[i] < 'A' || flight_code[i] > 'Z') {
+			printf(FLIGHT_ERR_INVALID); /* it doesn't start with two uppercase letters */
+			return 1;
+		}
+	}
+
+	if (flight_code[i] == '0') {
+	 	printf(FLIGHT_ERR_INVALID); /* the digits start with a zero */
+	 	return 1;
+	}
+	while (flight_code[i] != '\0') {
+		if (flight_code[i] < '0' || flight_code[i] > '9') {
+			printf(FLIGHT_ERR_INVALID); /* the digits are invalid */
+			return 1;
+		}
+		i++;
+	}
+
+	if (i > 6) {
+		printf(FLIGHT_ERR_INVALID); /* length of flight code is too big */
+		return 1;
+	}
+
+	for (i = 0; i < totalFlights; i++) {
+		if (strcmp(allFlights[i].flight_code, flight_code) == 0 &&
+			CompareDates(allFlights[i].date_departure, date_depart, 0) == 0) {
+			printf(FLIGHT_ERR_DUPLICATE); /* another flight exists on the same day with the same code */
+			return 1;
+		}
 	}
 
 	return 0;
