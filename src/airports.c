@@ -31,7 +31,7 @@ int CheckAddAirportErrors(const char id[]) {
 	}
 	if (totalAirports >= MAX_AIRPORTS) {
 		printf(AIRPORT_ERR_TOO_MANY); /* no more space to add new airports*/
-		retun 1;
+		return 1;
 	}
 	if (!CheckAirportExistence(id)) {
 		printf(AIRPORT_ERR_DUPLICATE); /* duplicated airport */
