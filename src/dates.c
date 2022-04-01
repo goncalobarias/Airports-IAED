@@ -23,10 +23,9 @@ int CheckDateErrors(clock date_depart) {
  * Transforms the date and duration into minutes and adds them up, then it
  * converts the new date in minutes into a proper formatted date.
  */
-clock UpdateDate(clock date_departure, clock duration) {
+clock UpdateDate(clock date_departure, int duration) {
 	int date_departure_mins = ConvertDatesToMins(date_departure);
-	int dur = ConvertDatesToMins(duration);
-	int updated_date_mins = date_departure_mins + dur, i = 0;
+	int updated_date_mins = date_departure_mins + duration, i = 0;
 	clock date_arrival;
 
 	/* updates the year */
@@ -123,9 +122,7 @@ int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
 }
 
 /**
- * Reads the clock and retrives a date or a duration. If it receives the calendar
- * date 00-00-0000 (NO_DATE) then it will retrive a duration, otherwise it will
- * retrive a proper formatted date.
+ * Reads the clock and retrives a formatted date.
  */
 clock ReadClock(char calendar_date[], char hours_mins[]) {
 	clock date;
@@ -139,6 +136,21 @@ clock ReadClock(char calendar_date[], char hours_mins[]) {
 	sscanf(hours_mins, "%d%c%d", &date.hours, double_dots, &date.minutes);
 
 	return date;
+}
+
+/**
+ * Reads the hours and time of a duration of time and converts it into minutes.
+ */
+int ReadDuration(char duration[]) {
+	int hours, minutes, dur;
+	char double_dots[1];
+
+	/* reads the calendar date */
+	sscanf(duration, "%d%c%d", &hours, double_dots, &minutes);
+
+	dur = hours * MINS_HOUR + minutes;
+
+	return dur;
 }
 
 /**

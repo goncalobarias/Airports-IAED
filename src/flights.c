@@ -52,8 +52,6 @@ int CheckFlightCodeErrors(const char flight_code[], clock date_depart) {
  * Auxiliary function of the 'v' command.
  */
 int CheckAddFlightErrors(flight new_flight) {
-	int dur = ConvertDatesToMins(new_flight.duration);
-
 	if (CheckFlightCodeErrors(new_flight.flight_code,
 						   new_flight.date_departure)) {
 		return 1;
@@ -76,7 +74,7 @@ int CheckAddFlightErrors(flight new_flight) {
 
 	if (CheckDateErrors(new_flight.date_departure)) return 1;
 
-	if (dur > MAX_DURATION) {
+	if (new_flight.duration > MAX_DURATION) {
 		printf(FLIGHT_ERR_INVALID_DURATION);
 		return 1;
 	}

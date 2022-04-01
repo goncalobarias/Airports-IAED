@@ -43,7 +43,6 @@
 #define MINS_DAY 1440
 #define MINS_HOUR 60
 #define START_DAY "00:00"
-#define NO_DATE "00-00-0000"
 
 #define DATE_PRINT "%02d-%02d-%04d\n"
 #define DATE_FULL_PRINT " %02d-%02d-%04d %02d:%02d\n"
@@ -54,7 +53,6 @@
  * Structs
  */
 
-/* used for dates and durations of time */
 typedef struct {
 	int day;
 	int month;
@@ -68,7 +66,7 @@ typedef struct {
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
 	clock date_departure;
-	clock duration;
+	int duration;
 	clock date_arrival;
 	int capacity;
 } flight;
@@ -141,7 +139,7 @@ void ListAllFlights();
 
 int CheckDateErrors(clock date);
 
-clock UpdateDate(clock date_departure, clock duration);
+clock UpdateDate(clock date_departure, int duration);
 
 int ConvertDatesToMins(clock date);
 
@@ -150,5 +148,7 @@ int CompareDates(clock date_1, clock date_2, int mode);
 int CompareFlightDates(flight flight_1, flight flight_2, const int mode);
 
 clock ReadClock(char date[], char time[]);
+
+int ReadDuration(char duration[]);
 
 void PrintClock(clock date);

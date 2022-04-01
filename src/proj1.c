@@ -149,7 +149,7 @@ void AddFlight_ListFlights() {
 	GetOneArgument(capacity, 0);
 
 	new_flight.date_departure = ReadClock(date, time);
-	new_flight.duration = ReadClock(NO_DATE, duration);
+	new_flight.duration = ReadDuration(duration);
 	new_flight.capacity = atoi(capacity);
 	new_flight.date_arrival = UpdateDate(new_flight.date_departure,
 							  	new_flight.duration); /* gets the arrival date and time */
