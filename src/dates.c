@@ -19,6 +19,35 @@ int CheckDateErrors(clock date_depart) {
 }
 
 /**
+ * Calculates the date it receives in minutes relative to the start of the
+ * program (01-01-2022). If the date is before the start of the program the
+ * number will be negative.
+ */
+int ConvertDatesToMins(clock formatted_date) {
+	int mins = 0, i, year_difference;
+
+	/* calculates the year in minutes */
+	year_difference = formatted_date.year - 2022;
+	mins += (year_difference * MINS_YEAR);
+
+	/* calculates the month in minutes */
+	for (i = 0; i < formatted_date.month - 1; i++) {
+		mins += days_months[i] * MINS_DAY;
+	}
+
+	/* calculats the day in minutes */
+	if (formatted_date.day > 0) {
+		mins += (formatted_date.day - 1) * MINS_DAY;
+	}
+
+	/* calculates the hour in minutes and adds the rest into minutes */
+	mins += formatted_date.hours * MINS_HOUR;
+	mins += formatted_date.minutes;
+
+	return mins;
+}
+
+/**
  * Updates a date it receives with a certain duration.
  * Transforms the date into minutes and adds the duration to it, then it
  * converts the new date in minutes into a proper formatted date.
@@ -47,39 +76,6 @@ clock UpdateDate(clock date_departure, int duration) {
 	date_arrival.minutes = updated_date_mins % MINS_HOUR;
 
 	return date_arrival;
-}
-
-/**
- * Calculates the date it receives in minutes relative to the start of the
- * program (01-01-2022). If the date is before the start of the program the
- * number will be negative.
- */
-int ConvertDatesToMins(clock formatted_date) {
-	int mins = 0, i, year_difference;
-
-	/* calculates the year in minutes */
-	if (formatted_date.year > 0) {
-		year_difference = formatted_date.year - 2022;
-	} else {
-		year_difference = 0;
-	}
-	mins += (year_difference * MINS_YEAR);
-
-	/* calculates the month in minutes */
-	for (i = 0; i < formatted_date.month - 1; i++) {
-		mins += days_months[i] * MINS_DAY;
-	}
-
-	/* calculats the day in minutes */
-	if (formatted_date.day > 0) {
-		mins += (formatted_date.day - 1) * MINS_DAY;
-	}
-
-	/* calculates the hour in minutes and adds the rest into minutes */
-	mins += formatted_date.hours * MINS_HOUR;
-	mins += formatted_date.minutes;
-
-	return mins;
 }
 
 /**

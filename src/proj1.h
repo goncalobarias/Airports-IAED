@@ -37,7 +37,7 @@
 /* dates */
 #define DATE_LENGTH 11
 #define TIME_LENGTH 6
-#define MAX_DURATION 720
+#define MAX_DURATION_MINS 720
 #define MONTHS 12
 #define MINS_YEAR 525600
 #define MINS_DAY 1440

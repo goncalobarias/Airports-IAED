@@ -58,7 +58,7 @@ int CheckAddFlightErrors(flight new_flight) {
 		return 1;
 	}
 
-	if (new_flight.duration > MAX_DURATION) {
+	if (new_flight.duration > MAX_DURATION_MINS) {
 		printf(FLIGHT_ERR_INVALID_DURATION);
 		return 1;
 	}
