@@ -40,7 +40,7 @@ def main(nr_airports, nr_flights, last_command):
 
 if __name__ == '__main__':
     # Change this to your liking
-    nr_airports = 40
-    nr_flights = 30000
+    nr_airports = 10
+    nr_flights = 7500
     last_command = 'v'
     main(nr_airports, nr_flights, last_command)
