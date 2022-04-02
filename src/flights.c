@@ -1,4 +1,10 @@
-/* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt */
+/*
+ *		File: flights.c
+ * 		Author: Gonçalo Sampaio Bárias (ist1103124)
+ *		Email: goncalo.barias@tecnico.ulisboa.pt
+ *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
+ *		Description: All functions used to create and modify flights.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

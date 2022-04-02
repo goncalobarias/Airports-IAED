@@ -1,4 +1,10 @@
-/* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt */
+/*
+ *		File: dates.c
+ * 		Author: Gonçalo Sampaio Bárias (ist1103124)
+ *		Email: goncalo.barias@tecnico.ulisboa.pt
+ *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
+ *		Description: All the functions used to manipulate dates.
+ */
 
 #include <stdio.h>
 #include "proj1.h"
@@ -88,13 +94,13 @@ int CompareDates(clock date_1, clock date_2, const int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
 	int date_2_mins = ConvertDatesToMins(date_2);
 
-	if (date_1_mins == date_2_mins) {
-		return 0;
-	}
-
 	/* if the mode is 0, two dates will be equal if they are on the same day */
 	if (mode == 0 && date_1.month == date_2.month
 		&& date_1.day == date_2.day && date_1.year == date_2.year) {
+		return 0;
+	}
+
+	if (date_1_mins == date_2_mins) {
 		return 0;
 	}
 

@@ -1,12 +1,10 @@
-/* 103124 - Gonçalo Sampaio Bárias - goncalo.barias@tecnico.ulisboa.pt
-
-*--------------------------------------------------------------------*
-*                       Airport Manager                              *
-*                                                                    *
-* 1st IAED Project - 21/22                                           *
-* Computer Science and Engineering (Alameda)                         *
-* Instituto Superior Técnico                                         *
-*--------------------------------------------------------------------*/
+/*
+ *		File: proj1.c
+ * 		Author: Gonçalo Sampaio Bárias (ist1103124)
+ *		Email: goncalo.barias@tecnico.ulisboa.pt
+ *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
+ *		Description: Main project file for the 1st IAED Project - 21/22 (Airport Manager).
+ */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -230,7 +228,7 @@ void AdvanceSystemDate() {
 
 	global_date = new_date;
 	max_date = new_date;
-	max_date.year += 1; /* sets the max date one year in the future */
+	max_date.year++; /* sets the max date one year in the future */
 
 	printf(DATE_PRINT, global_date.day, global_date.month, global_date.year);
 }
