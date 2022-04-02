@@ -82,9 +82,9 @@ clock UpdateDate(clock date, int duration) {
 
 /**
  * Transforms two dates into minutes and compares them.
- * If the mode is set to 0, it will compare the dates by day instead of minutes.
- * Returns 1 if the second date is bigger then the first on, 0 if both are equal
- * dates or -1 if the first date is bigger then the second.
+ * If the mode is set to 0, it will compare the dates by day of year instead of
+ * minutes. Returns 1 if the second date is bigger then the first on, 0 if
+ * both are equal dates or -1 if the first date is bigger then the second.
  */
 int CompareDates(clock date_1, clock date_2, const int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);

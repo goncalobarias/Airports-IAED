@@ -9,17 +9,6 @@
 #include "proj1.h"
 
 /**
- * Uses the GetOneArgument function to read all of the arguments from stdin that
- * create an airport. Starts the number of departures of the new airport at 0.
- */
-void ReadAirport(airport *new_airport) {
-	GetOneArgument(new_airport->id, 0);
-	GetOneArgument(new_airport->country, 0);
-	GetOneArgument(new_airport->city, 1);
-	new_airport->departures = 0;
-}
-
-/**
  * Checks if the airport id that it receives is valid.
  * If so, it returns 0, otherwise it returns 1.
  * Auxiliary function of the 'a' command.
@@ -65,10 +54,9 @@ int CheckAirportExistence(const char id[]) {
 
 /**
  * Uses binary search to get the index of an airport from the id it receives.
- * It uses the sortedAirports array to do the searching. It compares the id
- * of the middle position with the id it receives on each iteration. If the
- * airport is found, it returns it's position on the sorted array, otherwise
- * it returns the position where the airport should be inserted.
+ * It uses the sortedAirports array to do the searching. If the airport is found,
+ * it returns it's position on the sorted array, otherwise it returns the
+ * position where the airport should be inserted.
  */
 int GetAirport(const char id[]) {
 	int left = 0, right = totalAirports - 1, middle, comp;

@@ -74,19 +74,25 @@ int handle_commands() {
  * Adds a new airport to the system with the specified ID, country and city.
  */
 void AddAirport() {
-	airport new_airport;
+	char id[ID_LENGTH], country[MAX_COUNTRY_LENGTH], city[MAX_CITY_LENGTH];
 
-	ReadAirport(&new_airport);
+	GetOneArgument(id, 0);
+	GetOneArgument(country, 0);
+	GetOneArgument(city, 1);
 
-	if (CheckAddAirportErrors(new_airport.id)) {
+	if (CheckAddAirportErrors(id)) {
 		return;
 	}
 
-	/* actually add the aiport to the system */
-	allAirports[totalAirports] = new_airport;
-	AddSortedAirport(new_airport);
+	/* actually adds the airport to the system */
+	strcpy(allAirports[totalAirports].id, id);
+	strcpy(allAirports[totalAirports].country, country);
+	strcpy(allAirports[totalAirports].city, city);
+	allAirports[totalAirports].departures = 0;
 
-	printf(AIRPORT_ADD_PRINT, new_airport.id);
+	AddSortedAirport(allAirports[totalAirports]);
+
+	printf(AIRPORT_ADD_PRINT, allAirports[totalAirports].id);
 
 	totalAirports++;
 }
@@ -108,6 +114,7 @@ void ListAirports() {
 	}
 
 	do {
+		/* when the state is 1 it means it just read the last argument */
 		state = GetOneArgument(id, 0);
 
 		if (CheckAirportExistence(id)) {
@@ -235,7 +242,6 @@ void AdvanceSystemDate() {
 }
 
 /**
- * Reads a single argument from stdin and stores it.
  * Fetches one argument (characters separated by spaces) from the standard
  * input and populates the given string with it.
  * Ignores any trailing white spaces and always stops at a newline or end of file.

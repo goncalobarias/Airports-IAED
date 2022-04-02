@@ -123,8 +123,7 @@ int CheckFlightCodeErrors(const char flight_code[], clock date_depart) {
 /**
  * Uses binary search to insert a flight into an array sorted by date.
  * It uses the sort array to insert the index of the new flight on the right position.
- * It compares the flight in the middle position with the flight it receives on each
- * iteration. If the mode is 0 it will insert sorted by arrival date, otherwise it
+ * If the mode is 0 it will insert sorted by arrival date, otherwise it
  * will be sorted by departure date.
  */
 void AddSortedFlight(int sort[], flight new_flight, const int mode) {

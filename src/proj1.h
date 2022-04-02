@@ -122,8 +122,6 @@ char GetOneArgument(char *argument, const int mode);
 
 /* airports.c */
 
-void ReadAirport(airport *new_airport);
-
 int CheckAddAirportErrors(const char id[]);
 
 int CheckAirportExistence(const char id[]);
