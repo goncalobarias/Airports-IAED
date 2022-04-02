@@ -1,8 +1,6 @@
 /*
  *		File: flights.c
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Email: goncalo.barias@tecnico.ulisboa.pt
- *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
  *		Description: All functions used to create and modify flights.
  */
 
@@ -61,6 +59,7 @@ int CheckAddFlightErrors(flight new_flight) {
 	}
 
 	if (CheckDateErrors(new_flight.date_departure)) {
+		printf(DATE_ERR_INVALID);
 		return 1;
 	}
 

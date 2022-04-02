@@ -1,8 +1,6 @@
 /*
  *		File: airports.c
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Email: goncalo.barias@tecnico.ulisboa.pt
- *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
  *		Description: All functions used to create and modify airports.
  */
 
@@ -55,7 +53,7 @@ int CheckAddAirportErrors(const char id[]) {
 int CheckAirportExistence(const char id[]) {
 	int i = GetAirport(id);
 
-	/* if the index of the airport is out of bounds or the airport is not on the */
+	/* if the index of the airport is out of bounds or the airport is not in the */
 	/* system it returns 1. */
 	if (i == totalAirports
 		|| strcmp(allAirports[sortedAirports[i]].id, id) != 0) {

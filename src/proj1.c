@@ -223,6 +223,7 @@ void AdvanceSystemDate() {
 	new_date = ReadClock(date, START_DAY);
 
 	if (CheckDateErrors(new_date)) {
+		printf(DATE_ERR_INVALID);
 		return;
 	}
 

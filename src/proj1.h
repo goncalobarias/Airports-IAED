@@ -1,8 +1,6 @@
 /*
  *		File: proj1.h
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Email: goncalo.barias@tecnico.ulisboa.pt
- *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
  *		Description: Header file for the whole project.
  *				Includes constants, prototypes and external variables.
  */

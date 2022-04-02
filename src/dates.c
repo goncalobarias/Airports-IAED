@@ -1,8 +1,6 @@
 /*
  *		File: dates.c
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Email: goncalo.barias@tecnico.ulisboa.pt
- *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
  *		Description: All the functions used to manipulate dates.
  */
 
@@ -17,7 +15,6 @@
 int CheckDateErrors(clock date_depart) {
 	if (CompareDates(global_date, date_depart, 1) > 0
 		|| CompareDates(max_date, date_depart, 0) < 0) {
-		printf(DATE_ERR_INVALID);
 		return 1;
 	}
 
@@ -32,21 +29,21 @@ int CheckDateErrors(clock date_depart) {
 int ConvertDatesToMins(clock formatted_date) {
 	int mins = 0, i, year_difference;
 
-	/* calculates the year in minutes */
+	/* calculates the relative year in minutes */
 	year_difference = formatted_date.year - 2022;
 	mins += (year_difference * MINS_YEAR);
 
-	/* calculates the month in minutes */
+	/* calculates the relative month in minutes */
 	for (i = 0; i < formatted_date.month - 1; i++) {
 		mins += days_months[i] * MINS_DAY;
 	}
 
-	/* calculats the day in minutes */
+	/* calculats the relative day in minutes */
 	if (formatted_date.day > 0) {
 		mins += (formatted_date.day - 1) * MINS_DAY;
 	}
 
-	/* calculates the hour in minutes and adds the rest into minutes */
+	/* calculates the relative hour in minutes and adds the rest into relative minutes */
 	mins += formatted_date.hours * MINS_HOUR;
 	mins += formatted_date.minutes;
 
@@ -58,30 +55,29 @@ int ConvertDatesToMins(clock formatted_date) {
  * Transforms the date into minutes and adds the duration to it, then it
  * converts the new date in minutes into a proper formatted date.
  */
-clock UpdateDate(clock date_departure, int duration) {
-	int date_departure_mins = ConvertDatesToMins(date_departure);
+clock UpdateDate(clock date, int duration) {
+	int date_departure_mins = ConvertDatesToMins(date);
 	int updated_date_mins = date_departure_mins + duration, i = 0;
-	clock date_arrival;
 
 	/* updates the year */
-	date_arrival.year = date_departure.year + updated_date_mins / MINS_YEAR;
+	date.year += updated_date_mins / MINS_YEAR;
 	updated_date_mins = updated_date_mins % MINS_YEAR;
 
 	/* updates the month */
 	while (updated_date_mins >= days_months[i++] * MINS_DAY) {
 		updated_date_mins -= days_months[i - 1] * MINS_DAY;
 	}
-	date_arrival.month = i;
+	date.month = i;
 
 	/* updates the day */
-	date_arrival.day = updated_date_mins / MINS_DAY + 1;
+	date.day = updated_date_mins / MINS_DAY + 1;
 	updated_date_mins = updated_date_mins % MINS_DAY;
 
 	/* updates the hours and minutes */
-	date_arrival.hours = updated_date_mins / MINS_HOUR;
-	date_arrival.minutes = updated_date_mins % MINS_HOUR;
+	date.hours = updated_date_mins / MINS_HOUR;
+	date.minutes = updated_date_mins % MINS_HOUR;
 
-	return date_arrival;
+	return date;
 }
 
 /**
@@ -146,7 +142,7 @@ int ReadDuration(char duration[]) {
 	int hours, minutes, dur;
 	char double_dots[1];
 
-	/* reads the calendar date */
+	/* reads the duration time */
 	sscanf(duration, "%d%c%d", &hours, double_dots, &minutes);
 
 	dur = hours * MINS_HOUR + minutes;
