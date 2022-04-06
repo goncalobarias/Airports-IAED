@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "proj1.h"
+#include "main.h"
 
 /**
  * Checks if the airport id that it receives is valid.

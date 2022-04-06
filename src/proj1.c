@@ -7,9 +7,8 @@
  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
-#include "proj1.h"
+#include "main.h"
 
 /* Global variables */
 int totalAirports; 									/* tracks the total amount of airports added by the user */
@@ -17,8 +16,6 @@ int totalFlights; 									/* tracks the total amount of flights added by the us
 airport allAirports[MAX_AIRPORTS]; 					/* stores all of the current airports */
 flight allFlights[MAX_FLIGHTS]; 					/* stores all of the current flights */
 int sortedAirports[MAX_AIRPORTS]; 					/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
-int sortedFlights_departure[MAX_FLIGHTS];			/* stores the indexes of all the flights, sorted by departure date and time */
-int sortedFlights_arrival[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by arrival date and time */
 clock global_date = {1, 1, 2022, 0, 0};				/* stores the system date of the system */
 clock max_date = {1, 1, 2023, 0, 0};				/* stores the date that is one year in future from the system date */
 const int days_months[MONTHS] = {31, 28, 31, 30, 	/* stores the amount of days per month in a non leap year */
@@ -62,6 +59,12 @@ int handle_commands() {
 			return 1;
 		case 't':
 			AdvanceSystemDate();
+			return 1;
+		case 'r':
+			AddBooking_ListBookings();
+			return 1;
+		case 'e':
+			DeleteBooking_Flight();
 			return 1;
 		default:
 			/* ignore all unknown commands */
@@ -152,8 +155,6 @@ void AddFlight_ListFlights() {
 
 	/* actually add the flight to the system */
 	allFlights[totalFlights] = new_flight;
-	AddSortedFlight(sortedFlights_arrival, new_flight, 0);
-	AddSortedFlight(sortedFlights_departure, new_flight, 1);
 
 	/* updates the number of departures on the departure airport */
 	departure_airport = GetAirport(new_flight.departure_id);
@@ -169,7 +170,7 @@ void AddFlight_ListFlights() {
  */
 void FlightDeparturesInAirport() {
 	char id[ID_LENGTH];
-	int j, i;
+	int j, size = 0, indexes[MAX_FLIGHTS];
 
 	GetOneArgument(id, 0);
 	if (CheckAirportExistence(id)) {
@@ -180,13 +181,15 @@ void FlightDeparturesInAirport() {
 	for (j = 0; j < totalFlights; j++) {
 		/* looks at the sorted flights to find the ones linked to the right */
 		/* departure id */
-		i = sortedFlights_departure[j];
-		if (strcmp(allFlights[i].departure_id, id) == 0) {
-			printf(FLIGHT_PRINT, allFlights[i].flight_code,
-		  						allFlights[i].arrival_id);
-
-			PrintClock(allFlights[i].date_departure);
+		if (strcmp(allFlights[j].departure_id, id) == 0) {
+			AddSortedFlight(indexes, size++, allFlights[j], j, 1);
 		}
+	}
+
+	for (j = 0; j < size; j++) {
+		printf(FLIGHT_PRINT, allFlights[indexes[j]].flight_code,
+	  						allFlights[indexes[j]].arrival_id);
+		PrintClock(allFlights[indexes[j]].date_departure);
 	}
 }
 
@@ -197,7 +200,7 @@ void FlightDeparturesInAirport() {
  */
 void FlightArrivalsInAirport() {
 	char id[ID_LENGTH];
-	int j, i;
+	int j, size = 0, indexes[MAX_FLIGHTS];
 
 	GetOneArgument(id, 0);
 	if (CheckAirportExistence(id)) {
@@ -207,14 +210,16 @@ void FlightArrivalsInAirport() {
 
 	for (j = 0; j < totalFlights; j++) {
 		/* looks at the sorted flights to find the ones linked to the right */
-		/* arrival id */
-		i = sortedFlights_arrival[j];
-		if (strcmp(allFlights[i].arrival_id, id) == 0) {
-			printf(FLIGHT_PRINT, allFlights[i].flight_code,
-		  						allFlights[i].departure_id);
-
-			PrintClock(allFlights[i].date_arrival);
+		/* departure id */
+		if (strcmp(allFlights[j].arrival_id, id) == 0) {
+			AddSortedFlight(indexes, size++, allFlights[j], j, 0);
 		}
+	}
+
+	for (j = 0; j < size; j++) {
+		printf(FLIGHT_PRINT, allFlights[indexes[j]].flight_code,
+	  						allFlights[indexes[j]].departure_id);
+		PrintClock(allFlights[indexes[j]].date_arrival);
 	}
 }
 
@@ -245,24 +250,26 @@ void AdvanceSystemDate() {
  * Fetches one argument (characters separated by spaces) from the standard
  * input and populates the given string with it.
  * Ignores any trailing white spaces and always stops at a newline or end of file.
- * If the mode is set to 0 it will fetch for an argument that contains whitespaces
+ * If the mode is set to 1 it will fetch for an argument that contains whitespaces
  * and only end on a newline or end of file.
  */
 char GetOneArgument(char *argument, const int mode) {
 	int i = 0;
-	char c;
+	char c = getchar();
 
-	while ((c = getchar()) != '\n' && c != EOF) {
-		/* ignores trailing white space */
-		if (i == 0 && isspace(c)) {
-			continue;
-		}
-		/* finishes argument when a non trailing white space is read if the */
-		/* mode is 0 */
-		if (mode == 0 && isspace(c)) {
+	/* ignores trailing white spaces */
+	while (c == ' ' || c == '\t') {
+		c = getchar();
+	}
+
+	/* finishes argument when a non trailing white space is read if the */
+	/* mode is 0 */
+	while (c != '\n' && c != EOF) {
+		if (mode == 0 && (c == ' ' || c == '\t')) {
 			break;
 		}
 		argument[i++] = c;
+		c = getchar();
 	}
 	argument[i] = '\0';
 

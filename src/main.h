@@ -118,6 +118,10 @@ void FlightArrivalsInAirport();
 
 void AdvanceSystemDate();
 
+void AddBooking_ListBookings();
+
+void DeleteBooking_Flight();
+
 char GetOneArgument(char *argument, const int mode);
 
 /* airports.c */
@@ -142,7 +146,8 @@ int CheckAddFlightErrors(flight new_flight);
 
 int CheckFlightCodeErrors(const char flight_code[], clock date);
 
-void AddSortedFlight(int sort[], flight new_flight, const int mode);
+void AddSortedFlight(int sort[], int size, flight new_flight, int index,
+					 const int mode);
 
 void ListAllFlights();
 

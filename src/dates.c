@@ -5,7 +5,7 @@
  */
 
 #include <stdio.h>
-#include "proj1.h"
+#include "main.h"
 
 /**
  * Checks if the date is not in the past or one year in the future.

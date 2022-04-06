@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "proj1.h"
+#include "main.h"
 
 /**
  * Uses the GetOneArgument function to read all of the arguments from stdin that
@@ -126,8 +126,9 @@ int CheckFlightCodeErrors(const char flight_code[], clock date_depart) {
  * If the mode is 0 it will insert sorted by arrival date, otherwise it
  * will be sorted by departure date.
  */
-void AddSortedFlight(int sort[], flight new_flight, const int mode) {
-	int left = 0, right = totalFlights - 1, middle, comp, i;
+void AddSortedFlight(int sort[], int size, flight new_flight, int index,
+					 const int mode) {
+	int left = 0, right = size - 1, middle, comp, i;
 
 	while (left <= right) {
 		middle = (left + right) / 2;
@@ -139,10 +140,10 @@ void AddSortedFlight(int sort[], flight new_flight, const int mode) {
 		}
 	}
 
-	for (i = totalFlights - 1; i >= left; i--) {
+	for (i = size - 1; i >= left; i--) {
 		sort[i + 1] = sort[i];
 	}
-	sort[left] = totalFlights;
+	sort[left] = index;
 }
 
 /**
