@@ -1,7 +1,7 @@
 /*
  *		File: proj1.h
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Description: Header file for the whole project.
+ *		Description: Header file for the first project.
  *				Includes constants, prototypes and external variables.
  */
 
@@ -92,11 +92,9 @@ extern int totalFlights;
 extern airport allAirports[MAX_AIRPORTS];
 extern flight allFlights[MAX_FLIGHTS];
 extern int sortedAirports[MAX_AIRPORTS];
-extern int sortedFlights_departure[MAX_FLIGHTS];
-extern int sortedFlights_arrival[MAX_FLIGHTS];
 extern clock global_date;
 extern clock max_date;
-extern const int days_months[MONTHS];
+extern const int days_months_ac[MONTHS];
 
 /**
  * Prototypes
@@ -118,13 +116,11 @@ void FlightArrivalsInAirport();
 
 void AdvanceSystemDate();
 
-void AddBooking_ListBookings();
-
-void DeleteBooking_Flight();
-
 char GetOneArgument(char *argument, const int mode);
 
 /* airports.c */
+
+void ReadAirport(airport *airport_1);
 
 int CheckAddAirportErrors(const char id[]);
 
@@ -144,7 +140,9 @@ void ReadFlight(flight *new_flight);
 
 int CheckAddFlightErrors(flight new_flight);
 
-int CheckFlightCodeErrors(const char flight_code[], clock date);
+int CheckFlightCodeErrors(const char flight_code[]);
+
+int CheckDuplicateFlight(const char flight_code[], clock date);
 
 void AddSortedFlight(int sort[], int size, flight new_flight, int index,
 					 const int mode);

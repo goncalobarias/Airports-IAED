@@ -5,7 +5,7 @@
  */
 
 #include <stdio.h>
-#include "main.h"
+#include "proj1.h"
 
 /**
  * Checks if the date is not in the past or one year in the future.
@@ -27,21 +27,17 @@ int CheckDateErrors(clock date_depart) {
  * number will be negative.
  */
 int ConvertDatesToMins(clock formatted_date) {
-	int mins = 0, i, year_difference;
+	int mins = 0, year_difference;
 
 	/* calculates the relative year in minutes */
 	year_difference = formatted_date.year - 2022;
-	mins += (year_difference * MINS_YEAR);
+	mins += year_difference * MINS_YEAR;
 
 	/* calculates the relative month in minutes */
-	for (i = 0; i < formatted_date.month - 1; i++) {
-		mins += days_months[i] * MINS_DAY;
-	}
+	mins += days_months_ac[formatted_date.month - 1] * MINS_DAY;
 
 	/* calculats the relative day in minutes */
-	if (formatted_date.day > 0) {
-		mins += (formatted_date.day - 1) * MINS_DAY;
-	}
+	mins += (formatted_date.day - 1) * MINS_DAY;
 
 	/* calculates the relative hour in minutes and adds the rest into relative minutes */
 	mins += formatted_date.hours * MINS_HOUR;
@@ -57,17 +53,18 @@ int ConvertDatesToMins(clock formatted_date) {
  */
 clock UpdateDate(clock date, int duration) {
 	int date_departure_mins = ConvertDatesToMins(date);
-	int updated_date_mins = date_departure_mins + duration, i = 0;
+	int updated_date_mins = date_departure_mins + duration, i = 1;
 
 	/* updates the year */
 	date.year += updated_date_mins / MINS_YEAR;
 	updated_date_mins = updated_date_mins % MINS_YEAR;
 
 	/* updates the month */
-	while (updated_date_mins >= days_months[i++] * MINS_DAY) {
-		updated_date_mins -= days_months[i - 1] * MINS_DAY;
+	while (i <= 11 && updated_date_mins >= days_months_ac[i] * MINS_DAY) {
+		i++;
 	}
 	date.month = i;
+	updated_date_mins -= days_months_ac[i - 1] * MINS_DAY;
 
 	/* updates the day */
 	date.day = updated_date_mins / MINS_DAY + 1;

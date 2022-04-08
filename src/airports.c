@@ -6,7 +6,18 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "main.h"
+#include "proj1.h"
+
+/**
+ * Uses the GetOneArgument function to read all of the arguments from stdin that
+ * create an airport.
+ */
+void ReadAirport(airport *new_airport) {
+	GetOneArgument(new_airport->id, 0);
+	GetOneArgument(new_airport->country, 0);
+	GetOneArgument(new_airport->city, 1);
+	new_airport->departures = 0;
+}
 
 /**
  * Checks if the airport id that it receives is valid.
@@ -24,14 +35,13 @@ int CheckAddAirportErrors(const char id[]) {
 	}
 	if (totalAirports >= MAX_AIRPORTS) {
 		printf(AIRPORT_ERR_TOO_MANY); /* no more space to add new airports*/
-		return 1;
-	}
-	if (!CheckAirportExistence(id)) {
+	} else if (!CheckAirportExistence(id)) {
 		printf(AIRPORT_ERR_DUPLICATE); /* duplicated airport */
-	 	return 1;
+	} else {
+		return 0;
 	}
 
-	return 0;
+	return 1;
 }
 
 /**
