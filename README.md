@@ -11,7 +11,7 @@ ___
 ### Usar
 1. Clonar a repo
 ```
-git clone https://github.com/Gocho1234/Aeroportos-IAED.git
+git clone -b project-2 https://github.com/Gocho1234/Aeroportos-IAED.git
 ```
 2. Compilar e correr o código
 ```
