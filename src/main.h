@@ -1,7 +1,7 @@
 /*
  *		File: proj1.h
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Description: Header file for the first project.
+ *		Description: Header file for the whole project.
  *				Includes constants, prototypes and external variables.
  */
 
@@ -54,8 +54,26 @@
 
 #define DATE_ERR_INVALID "invalid date\n"
 
+/* booking */
+#define MAX_BOOKING_LENGTH 65535
+
+#define BOOKING_FULL_PRINT "%s %d\n"
+
+#define BOOKING_ERR_INVALID "invalid reservation code\n"
+#define BOOKING_ERR_FLIGHT_CODE "%s: flight does not exist\n"
+#define BOOKING_ERR_DUPLICATE "%s: flight reservation already used\n"
+#define BOOKING_ERR_TOO_MANY "too many reservations\n"
+#define BOOKING_ERR_PASSANGER "invalid passenger number\n"
+#define BOOKING_FLIGHT_NA "not found\n"
+
+/* structures */
+#define MEMORY_ERR "No memory.\n"
+#define MEMORY_ERR_CODE -1
+#define MAX_LOAD 0.5
+#define HASHTABLE_START_SIZE 7
+
 /**
- * Structs
+ * Data structures
  */
 
 typedef struct {
@@ -82,6 +100,13 @@ typedef struct {
 	char city[MAX_CITY_LENGTH];
 	int departures;
 } airport;
+
+typedef struct {
+} booking;
+
+typedef struct hashtable_t hashtable;
+
+typedef struct hash_elem_t hash_elem;
 
 /**
  * External variables
@@ -166,3 +191,15 @@ clock ReadClock(char date[], char time[]);
 int ReadDuration(char duration[]);
 
 void PrintClock(clock date);
+
+/* proj2.c */
+
+void AddBooking_ListBookings();
+
+void DeleteBooking_Flight();
+
+void ReadBooking(booking *booking_1);
+
+int CheckAddBookingErrors(booking booking_1);
+
+/* structures.c */

@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "proj1.h"
+#include "main.h"
 
 /* Global variables */
 int totalAirports; 							/* tracks the total amount of airports added by the user */

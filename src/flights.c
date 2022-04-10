@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "proj1.h"
+#include "main.h"
 
 /**
  * Uses the GetOneArgument function to read all of the arguments from stdin that
