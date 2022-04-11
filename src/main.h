@@ -71,6 +71,8 @@
 #define MEMORY_ERR_CODE -1
 #define MAX_LOAD 0.5
 #define HASHTABLE_START_SIZE 7
+#define HASHTABLE_DELETED -2
+#define HASHTABLE_TAKEN -3
 
 /**
  * Data structures
@@ -100,9 +102,6 @@ typedef struct {
 	char city[MAX_CITY_LENGTH];
 	int departures;
 } airport;
-
-typedef struct {
-} booking;
 
 typedef struct hashtable_t hashtable;
 
@@ -203,3 +202,27 @@ void ReadBooking(booking *booking_1);
 int CheckAddBookingErrors(booking booking_1);
 
 /* structures.c */
+
+unsigned int calc_hash(char* key);
+
+unsigned int calc_hash_step(char* key);
+
+int* hashtable_calc_hashes(char* key, int size);
+
+hashtable* hashtable_create(int size);
+
+hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key);
+
+hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
+
+void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*));
+
+hashtable* hashtable_expand(hashtable* hash_t);
+
+void hashtable_destroy(hashtable* hash_t);
+
+void* secure_malloc(unsigned int allocation);
+
+int isPrime(int x);
+
+int getPrime(int minNum);
