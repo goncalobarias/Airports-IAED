@@ -78,6 +78,14 @@
  * Data structures
  */
 
+typedef struct hashtable_t hashtable;
+
+typedef struct hash_elem_t hash_elem;
+
+typedef struct node node_t;
+
+typedef struct list list_t;
+
 typedef struct {
 	int day;
 	int month;
@@ -94,6 +102,7 @@ typedef struct {
 	int duration;
 	clock date_arrival;
 	int capacity;
+	list_t* reservations;
 } flight;
 
 typedef struct {
@@ -102,10 +111,6 @@ typedef struct {
 	char city[MAX_CITY_LENGTH];
 	int departures;
 } airport;
-
-typedef struct hashtable_t hashtable;
-
-typedef struct hash_elem_t hash_elem;
 
 /**
  * External variables
@@ -197,7 +202,7 @@ void AddBooking_ListBookings();
 
 void DeleteBooking_Flight();
 
-void ReadBooking(booking *booking_1);
+void ReadBooking(booking* booking_1);
 
 int CheckAddBookingErrors(booking booking_1);
 
@@ -213,13 +218,21 @@ hashtable* hashtable_create(int size);
 
 hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key);
 
-hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
+void* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
 
 void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*));
 
 hashtable* hashtable_expand(hashtable* hash_t);
 
 void hashtable_destroy(hashtable* hash_t);
+
+list_t* list_create();
+
+void list_insert(list_t* list, void* data);
+
+void list_remove(list_t* list, hashtable* hash_t, void* key, char*(*get_key)(void*), void(*clear_data)(node_t*));
+
+void list_destroy(list_t* list, void(*clear_data)(node_t*));
 
 void* secure_malloc(unsigned int allocation);
 

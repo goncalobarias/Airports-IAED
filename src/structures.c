@@ -11,8 +11,7 @@
 
 struct hash_elem_t {
 	void* data;
-	unsigned int hash_1;
-	unsigned int hash_2;
+	unsigned int hash_1, hash_2;
 	int state;
 };
 
@@ -20,6 +19,15 @@ struct hashtable_t {
 	int size;
 	int elem_num;
 	hash_elem** table;
+};
+
+struct node {
+	void* data;
+	node_t *prev, *next;
+};
+
+struct list {
+	node_t *first, *last;
 };
 
 /*		Hashtables		*/
@@ -82,17 +90,17 @@ int* hashtable_calc_hashes(char* key, int size) {
  */
 hashtable* hashtable_create(int size) {
 	int i;
-	hashtable* hash_t = (hashtable*)secure_malloc(sizeof(hashtable));
+	hashtable* new_hash_t = (hashtable*)secure_malloc(sizeof(hashtable));
 
-	hash_t->table = (hash_elem**)secure_malloc(size * sizeof(hash_elem*));
-	hash_t->size = size;
-	hash_t->elem_num = 0;
+	new_hash_t->table = (hash_elem**)secure_malloc(size * sizeof(hash_elem*));
+	new_hash_t->size = size;
+	new_hash_t->elem_num = 0;
 
 	for(i = 0; i < size; i++) {
-		hash_t->table[i] = NULL;
+		new_hash_t->table[i] = NULL;
 	}
 
-	return hash_t;
+	return new_hash_t;
 }
 
 /**
@@ -131,7 +139,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key) {
 /**
  *
  */
-hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
+void* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 	int* hashing = hashtable_calc_hashes(key, hash_t->size);
 	int h = hashing[0], hash_1 = hashing[0], phi = hashing[2], i = 1;
 
@@ -143,7 +151,7 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 			h = (hash_1 + i * phi) % hash_t->size;
 			i++;
 		} else {
-			return hash_t->table[h];
+			return hash_t->table[h]->data;
 		}
 	}
 
@@ -154,7 +162,21 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
  *
  */
 void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
-	hash_elem* elem_remove = hashtable_get(hash_t, key, get_key);
+	hash_elem* elem_remove = NULL;
+	int* hashing = hashtable_calc_hashes(key, hash_t->size);
+	int h = hashing[0], hash_1 = hashing[0], phi = hashing[2], i = 1;
+
+	free(hashing);
+
+	while (hash_t->table[h] != NULL) {
+		if (hash_t->table[h]->state == HASHTABLE_DELETED
+			|| strcmp(get_key(hash_t->table[h]), key) != 0) {
+			h = (hash_1 + i * phi) % hash_t->size;
+			i++;
+		} else {
+			elem_remove = hash_t->table[h];
+		}
+	}
 
 	if (elem_remove == NULL) {
 		return;
@@ -215,6 +237,75 @@ void hashtable_destroy(hashtable* hash_t) {
 }
 
 /*		Linked Lists		*/
+
+/**
+ *
+ */
+list_t* list_create() {
+	list_t* new_list = (list_t*)secure_malloc(sizeof(list_t));
+	new_list->first = NULL;
+	new_list->last = NULL;
+
+	return new_list;
+}
+
+/**
+ *
+ */
+void list_insert(list_t* list, void* data) {
+	node_t* new_node = (node_t*)secure_malloc(sizeof(node_t));
+
+	new_node->data = data;
+
+	if (list->first == NULL) {
+		list->last = new_node;
+	} else {
+		new_node->prev = NULL;
+		new_node->next = list->first;
+		list->first->prev = new_node;
+	}
+
+	list->first = new_node;
+}
+
+/**
+ *
+ */
+void list_remove(list_t* list, hashtable* hash_t, void* key,
+				 char*(*get_key)(void*), void(*clear_data)(node_t*)) {
+	node_t* node_removal = hashtable_get(hash_t, key, get_key);
+
+	if (node_removal == NULL) {
+		return;
+	} else if (node_removal->prev != NULL) {
+		node_removal->prev->next = node_removal->next;
+	} else if (node_removal->prev == NULL) {
+		list->first = node_removal->next;
+	} else if (node_removal->next != NULL) {
+		node_removal->next->prev = node_removal->prev;
+	} else if (node_removal->next == NULL) {
+		list->last = node_removal->prev;
+	}
+
+	clear_data(node_removal);
+	free(node_removal);
+}
+
+/**
+ *
+ */
+void list_destroy(list_t* list, void(*clear_data)(node_t*)) {
+	node_t *p1, *p2 = list->first;
+
+	do {
+		p1 = p2;
+		p2 = p2->next;
+		clear_data(p1);
+		free(p1);
+	} while (p2 != NULL);
+
+	free(list);
+}
 
 /*		Utilities		*/
 
