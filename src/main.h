@@ -73,6 +73,8 @@
 #define HASHTABLE_START_SIZE 7
 #define HASHTABLE_DELETED -2
 #define HASHTABLE_TAKEN -3
+#define LIST_SORTED -4
+#define LIST_UNSORTED -5
 
 /**
  * Data structures
@@ -111,6 +113,9 @@ typedef struct {
 	char city[MAX_CITY_LENGTH];
 	int departures;
 } airport;
+
+typedef struct {
+} booking;
 
 /**
  * External variables

@@ -178,9 +178,7 @@ void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 		}
 	}
 
-	if (elem_remove == NULL) {
-		return;
-	} else {
+	if (elem_remove != NULL) {
 		elem_remove->state = HASHTABLE_DELETED;
 		--hash_t->elem_num;
 	}
