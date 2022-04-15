@@ -7,14 +7,17 @@
 #include <stdio.h>
 #include "main.h"
 
+const int days_months_ac[MONTHS] = 			/* stores the accumulated days per month in a non leap year (jan = 1) */
+	{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+
 /**
  * Checks if the date is not in the past or one year in the future.
  * If it's invalid it returns 1, otherwise it returns 0.
  * Auxiliary function of the 't' command.
  */
-int CheckDateErrors(clock date_depart) {
-	if (CompareDates(global_date, date_depart, 1) > 0
-		|| CompareDates(max_date, date_depart, 0) < 0) {
+int CheckDateErrors(global_store* global, clock date_depart) {
+	if (CompareDates(global->date, date_depart, 1) > 0
+		|| CompareDates(global->max_date, date_depart, 0) < 0) {
 		return 1;
 	}
 
@@ -101,18 +104,19 @@ int CompareDates(clock date_1, clock date_2, const int mode) {
 }
 
 /**
- * Used as a proxy function to the CompareDates function. Receives two
- * flights and compares the dates of the two flights depending on the mode it
- * receives. If the mode is 0, it will compare the flights based on their
- * arrival date, otherwise it will compare them based on their departure date.
+ * Receives two flights and compares the departure dates of the two flights.
  */
-int CompareFlightDates(flight flight_1, flight flight_2, const int mode) {
-	if (mode == 0) {
-		return CompareDates(flight_1.date_arrival, flight_2.date_arrival, 1);
-	} else {
-		return CompareDates(flight_1.date_departure, flight_2.date_departure,
-							1);
-	}
+int CompareFlightDatesDeparture(void* flight_1, void* flight_2) {
+	return CompareDates(((flight*)flight_1)->date_departure,
+					 ((flight*)flight_2)->date_departure, 1);
+}
+
+/**
+ * Receives two flights and compares the arrival dates of the two flights.
+ */
+int CompareFlightDatesArrival(void* flight_1, void* flight_2) {
+	return CompareDates(((flight*)flight_1)->date_arrival,
+					 ((flight*)flight_2)->date_arrival, 1);
 }
 
 /**

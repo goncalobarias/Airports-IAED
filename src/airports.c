@@ -24,7 +24,7 @@ void ReadAirport(airport *new_airport) {
  * If so, it returns 0, otherwise it returns 1.
  * Auxiliary function of the 'a' command.
  */
-int CheckAddAirportErrors(const char id[]) {
+int CheckAddAirportErrors(global_store* global, const char id[]) {
 	int i, id_len = strlen(id);
 
 	for (i = 0; i < id_len; i++) {
@@ -33,9 +33,9 @@ int CheckAddAirportErrors(const char id[]) {
 			return 1;
 		}
 	}
-	if (totalAirports >= MAX_AIRPORTS) {
+	if (global->totalAirports >= MAX_AIRPORTS) {
 		printf(AIRPORT_ERR_TOO_MANY); /* no more space to add new airports*/
-	} else if (!CheckAirportExistence(id)) {
+	} else if (!CheckAirportExistence(global, id)) {
 		printf(AIRPORT_ERR_DUPLICATE); /* duplicated airport */
 	} else {
 		return 0;
@@ -49,13 +49,13 @@ int CheckAddAirportErrors(const char id[]) {
  * to the system.
  * If so, it returns 0, otherwise it returns 1.
  */
-int CheckAirportExistence(const char id[]) {
-	int i = GetAirport(id);
+int CheckAirportExistence(global_store* global, const char id[]) {
+	int i = GetAirport(global, id);
 
 	/* if the index of the airport is out of bounds or the airport is not in the */
 	/* system it returns 1. */
-	if (i == totalAirports
-		|| strcmp(allAirports[sortedAirports[i]].id, id) != 0) {
+	if (i == global->totalAirports
+		|| strcmp(global->allAirports[global->sortedAirports[i]].id, id) != 0) {
 		return 1;
 	}
 
@@ -68,12 +68,13 @@ int CheckAirportExistence(const char id[]) {
  * it returns it's position on the sorted array, otherwise it returns the
  * position where the airport should be inserted.
  */
-int GetAirport(const char id[]) {
-	int left = 0, right = totalAirports - 1, middle, comp;
+int GetAirport(global_store* global, const char id[]) {
+	int left = 0, right = global->totalAirports - 1, middle, comp;
 
 	while (left <= right) {
 		middle = (left + right) / 2;
-		comp = strcmp(allAirports[sortedAirports[middle]].id, id);
+		comp =
+			strcmp(global->allAirports[global->sortedAirports[middle]].id, id);
 		if (comp == 0) {
 			return middle; /* it finds the airport */
 		} else if (comp < 0) {
@@ -90,26 +91,26 @@ int GetAirport(const char id[]) {
  * Adds a new airport to an array sorted by airport ids. It uses the
  * GetAirport function in order to find the place to insert the new airport.
  */
-void AddSortedAirport(airport airport_1) {
+void AddSortedAirport(global_store* global, airport airport_1) {
 	int index, i;
 
-	index = GetAirport(airport_1.id);
+	index = GetAirport(global, airport_1.id);
 
 	/* inserts the airport in the sorted array */
-	for (i = totalAirports - 1; i >= index; i--) {
-		sortedAirports[i + 1] = sortedAirports[i];
+	for (i = global->totalAirports - 1; i >= index; i--) {
+		global->sortedAirports[i + 1] = global->sortedAirports[i];
 	}
-	sortedAirports[index] = totalAirports;
+	global->sortedAirports[index] = global->totalAirports;
 }
 
 /**
  * Lists all of the airports sorted by their id in alphabetical order.
  */
-void ListAllAirports() {
+void ListAllAirports(global_store* global) {
 	int i;
 
-	for (i = 0; i < totalAirports; i++) {
-		PrintAirport(allAirports[sortedAirports[i]]);
+	for (i = 0; i < global->totalAirports; i++) {
+		PrintAirport(global->allAirports[global->sortedAirports[i]]);
 	}
 }
 
