@@ -40,7 +40,7 @@ typedef struct list {
 
 typedef struct node {
 	void* data;
-	struct node *prev, *next;
+	struct node *next;
 } node_t;
 
 /**
@@ -57,15 +57,17 @@ unsigned int* hashtable_calc_hashes(char* key, int size);
 
 hashtable* hashtable_create(int size);
 
-hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, void(*clear_data)(void*));
+hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key);
 
-void* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
+hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
 
 void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*), void(*clear_data)(void*));
 
-hashtable* hashtable_expand(hashtable* hash_t, void(*clear_data)(void*));
+int hash_elem_dead(hash_elem* elem);
 
-void hashtable_destroy(hashtable* hash_t, void(*clear_data)(void*));
+hashtable* hashtable_expand(hashtable* hash_t);
+
+void hashtable_destroy(hashtable* hash_t);
 
 /* linked lists */
 

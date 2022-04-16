@@ -117,7 +117,7 @@ void ListAirports(global_store* global) {
  * information.
  */
 void AddFlight_ListFlights(global_store* global) {
-	flight* new_flight = (flight*)SecureMalloc(sizeof(flight));
+	flight* new_flight;
 	int departure_airport;
 
 	/* if there is no arguments it lists all flights */
@@ -126,9 +126,10 @@ void AddFlight_ListFlights(global_store* global) {
 		return;
 	}
 
-	ReadFlight(new_flight);
+	new_flight = ReadFlight();
 
 	if (CheckAddFlightErrors(global, new_flight)) {
+		ClearFlight(new_flight);
 		return;
 	}
 
@@ -148,8 +149,8 @@ void AddFlight_ListFlights(global_store* global) {
  */
 void FlightDeparturesInAirport(global_store* global) {
 	char id[ID_LENGTH];
-	node_t *p1, *p2;
-	list_t* tmp_list = list_create();
+	node_t* p1;
+	list_t* tmp_list;
 	flight* tmp_flight;
 
 	GetOneArgument(id, 0);
@@ -157,6 +158,8 @@ void FlightDeparturesInAirport(global_store* global) {
 		printf(AIRPORT_ERR_NO_ID, id);
 		return;
 	}
+
+	tmp_list = list_create();
 
 	for (p1 = global->allFlights->first; p1 != NULL; p1 = p1->next) {
 		tmp_flight = (flight*)p1->data;
@@ -168,13 +171,7 @@ void FlightDeparturesInAirport(global_store* global) {
 
 	p1 = list_mergesort(tmp_list->first, CompareFlightDatesDeparture);
 
-	for (; p1 != NULL; p1 = p2) {
-		p2 = p1->next;
-		tmp_flight = (flight*)p1->data;
-		printf(FLIGHT_PRINT, tmp_flight->flight_code, tmp_flight->arrival_id);
-		PrintClock(tmp_flight->date_departure);
-		free(p1);
-	}
+	PrintFlights(p1, 0);
 
 	free(tmp_list);
 }
@@ -186,8 +183,8 @@ void FlightDeparturesInAirport(global_store* global) {
  */
 void FlightArrivalsInAirport(global_store* global) {
 	char id[ID_LENGTH];
-	node_t *p1, *p2;
-	list_t* tmp_list = list_create();
+	node_t* p1;
+	list_t* tmp_list;
 	flight* tmp_flight;
 
 	GetOneArgument(id, 0);
@@ -195,6 +192,8 @@ void FlightArrivalsInAirport(global_store* global) {
 		printf(AIRPORT_ERR_NO_ID, id);
 		return;
 	}
+
+	tmp_list = list_create();
 
 	for (p1 = global->allFlights->first; p1 != NULL; p1 = p1->next) {
 		tmp_flight = (flight*)p1->data;
@@ -206,13 +205,7 @@ void FlightArrivalsInAirport(global_store* global) {
 
 	p1 = list_mergesort(tmp_list->first, CompareFlightDatesArrival);
 
-	for (; p1 != NULL; p1 = p2) {
-		p2 = p1->next;
-		tmp_flight = (flight*)p1->data;
-		printf(FLIGHT_PRINT, tmp_flight->flight_code, tmp_flight->departure_id);
-		PrintClock(tmp_flight->date_arrival);
-		free(p1);
-	}
+	PrintFlights(p1, 1);
 
 	free(tmp_list);
 }
@@ -240,8 +233,11 @@ void AdvanceSystemDate(global_store* global) {
 	printf(DATE_PRINT, global->date.day, global->date.month, global->date.year);
 }
 
+/**
+ *
+ */
 global_store* GlobalInit() {
-	global_store* global = (global_store*)SecureMalloc(sizeof(global_store));
+	global_store* global = SecureMalloc(sizeof(global_store));
 
 	global->totalAirports = 0;
 	global->totalFlights = 0;

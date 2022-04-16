@@ -51,7 +51,7 @@ unsigned int calc_hash_step(char* key) {
  *
  */
 unsigned int* hashtable_calc_hashes(char* key, int size) {
-	unsigned int* hashing = (unsigned int*)SecureMalloc(sizeof(unsigned int) * 3);
+	unsigned int* hashing = SecureMalloc(sizeof(unsigned int) * 3);
 
 	hashing[0] = calc_hash(key);
 	hashing[1] = calc_hash_step(key);
@@ -70,7 +70,7 @@ unsigned int* hashtable_calc_hashes(char* key, int size) {
  */
 hashtable* hashtable_create(int size) {
 	int i;
-	hashtable* new_hash_t = (hashtable*)SecureMalloc(sizeof(hashtable));
+	hashtable* new_hash_t = SecureMalloc(sizeof(hashtable));
 
 	new_hash_t->table = (hash_elem**)SecureMalloc(size * sizeof(hash_elem*));
 	new_hash_t->size = size;
@@ -87,7 +87,7 @@ hashtable* hashtable_create(int size) {
  *
  */
 hash_elem* hashtable_element_create(unsigned int* hashing, void* data) {
-	hash_elem* elem = (hash_elem*)SecureMalloc(sizeof(hash_elem));
+	hash_elem* elem = SecureMalloc(sizeof(hash_elem));
 
 	elem->data = data;
 	elem->hash_1 = hashing[0];
@@ -100,7 +100,7 @@ hash_elem* hashtable_element_create(unsigned int* hashing, void* data) {
 /**
  *
  */
-hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, void(*clear_data)(void*)) {
+hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key) {
 	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
 	unsigned int h = hashing[0] % hash_t->size, phi = hashing[2];
 	int i = 1;
@@ -119,7 +119,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, void(*clea
 	hash_t->table[h] = elem;
 
 	if (++hash_t->elem_num >= hash_t->size * HASHTABLE_MAX_LOAD) {
-		hash_t = hashtable_expand(hash_t, clear_data);
+		hash_t = hashtable_expand(hash_t);
 	}
 
 	return hash_t;
@@ -128,7 +128,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, void(*clea
 /**
  *
  */
-void* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
+hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
 	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0], phi = hashing[2];
 	int i = 1;
@@ -166,6 +166,17 @@ void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*),
 /**
  *
  */
+int hash_elem_dead(hash_elem* elem) {
+	if (elem == NULL || elem->state == HASHTABLE_DELETED) {
+		return 1;
+	}
+
+	return 0;
+}
+
+/**
+ *
+ */
 void hashtable_reinsert(hash_elem* elem, hashtable* new_hash_t) {
 	int h = elem->hash_1 % new_hash_t->size, i = 1;
 	int phi = elem->hash_2 % new_hash_t->size;
@@ -184,7 +195,7 @@ void hashtable_reinsert(hash_elem* elem, hashtable* new_hash_t) {
 /**
  *
  */
-hashtable* hashtable_expand(hashtable* hash_t, void(*clear_data)(void*)) {
+hashtable* hashtable_expand(hashtable* hash_t) {
 	int i;
 	hashtable* new_hash_t = hashtable_create(GetPrime(hash_t->size * 2));
 
@@ -195,7 +206,7 @@ hashtable* hashtable_expand(hashtable* hash_t, void(*clear_data)(void*)) {
 		}
 	}
 
-	hashtable_destroy(hash_t, clear_data);
+	hashtable_destroy(hash_t);
 
 	return new_hash_t;
 }
@@ -203,19 +214,7 @@ hashtable* hashtable_expand(hashtable* hash_t, void(*clear_data)(void*)) {
 /**
  *
  */
-void hashtable_destroy(hashtable* hash_t, void(*clear_data)(void*)) {
-	int i;
-
-	for (i = 0; i < hash_t->size; i++) {
-		if (hash_t->table[i] == NULL) {
-			continue;
-		} else if (hash_t->table[i]->state == HASHTABLE_DELETED) {
-			free(hash_t->table[i]);
-		} else {
-			clear_data(hash_t->table[i]->data);
-			free(hash_t->table[i]);
-		}
-	}
+void hashtable_destroy(hashtable* hash_t) {
 	free(hash_t->table);
 	free(hash_t);
 }
@@ -226,7 +225,7 @@ void hashtable_destroy(hashtable* hash_t, void(*clear_data)(void*)) {
  *
  */
 list_t* list_create() {
-	list_t* new_list = (list_t*)SecureMalloc(sizeof(list_t));
+	list_t* new_list = SecureMalloc(sizeof(list_t));
 	new_list->first = NULL;
 	new_list->last = NULL;
 
@@ -237,11 +236,10 @@ list_t* list_create() {
  *
  */
 void list_insert(list_t* list, void* data) {
-	node_t* new_node = (node_t*)SecureMalloc(sizeof(node_t));
+	node_t* new_node = SecureMalloc(sizeof(node_t));
 
 	new_node->data = data;
 	new_node->next = NULL;
-	new_node->prev = list->last;
 
 	if (list->last == NULL) {
 		list->first = new_node;
@@ -257,23 +255,23 @@ void list_insert(list_t* list, void* data) {
  */
 void list_remove(list_t* list, void* key, char*(*get_key)(void*),
 				 void(*clear_data)(void*)) {
-	node_t *node_removal, *p2;
+	node_t *prev = NULL, *node_removal = list->first, *next = list->first;
 
-	for (node_removal = list->first; node_removal != NULL; node_removal = p2) {
-		p2 = node_removal->next;
+	for (; node_removal != NULL; node_removal = next) {
+		next = node_removal->next;
 
 		if (strcmp(get_key(node_removal->data), key) != 0) {
+			prev = node_removal;
 			continue;
 		}
 
-		if (node_removal->prev != NULL) {
-			node_removal->prev->next = node_removal->next;
-		} else if (node_removal->prev == NULL) {
-			list->first = node_removal->next;
-		} else if (node_removal->next != NULL) {
-			node_removal->next->prev = node_removal->prev;
-		} else if (node_removal->next == NULL) {
-			list->last = node_removal->prev;
+		if (prev != NULL) {
+			prev->next = node_removal->next;
+		} else if (prev == NULL) {
+			list->first = next;
+		}
+		if (next == NULL) {
+			list->last = prev;
 		}
 
 		clear_data(node_removal->data);
@@ -319,15 +317,10 @@ node_t* merge(node_t* first, node_t* second, int(*cmp)(void*, void*)) {
     /* gets the smaller value */
     if (cmp(first->data, second->data) < 0) {
         first->next = merge(first->next, second, cmp);
-        first->next->prev = first;
-        first->prev = NULL;
 
         return first;
-    }
-    else {
+    } else {
         second->next = merge(first, second->next, cmp);
-        second->next->prev = second;
-        second->prev = NULL;
 
         return second;
     }

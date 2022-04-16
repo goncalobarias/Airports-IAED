@@ -28,7 +28,7 @@ int CheckAddAirportErrors(global_store* global, const char id[]) {
 	int i, id_len = strlen(id);
 
 	for (i = 0; i < id_len; i++) {
-		if (id[i] < 'A' || id[i] > 'Z') {
+		if (!IsUpperCase(id[i])) {
 			printf(AIRPORT_ERR_INVALID); /* id contains unwanted characters */
 			return 1;
 		}

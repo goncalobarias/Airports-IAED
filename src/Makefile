@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Werror -ansi -pedantic
+CFLAGS=-Wall -Wextra -Werror -ansi -pedantic -g
 TARGET=proj2
 
 all:

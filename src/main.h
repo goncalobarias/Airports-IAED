@@ -30,7 +30,6 @@
 
 /* flights */
 #define MAX_FLIGHT_CODE_LENGTH 7
-#define MAX_CAPACITY_LENGTH 3
 #define MAX_FLIGHTS 30000
 #define MIN_PASSENGERS 10
 
@@ -84,11 +83,11 @@ typedef struct {
 } clock;
 
 typedef struct {
-	char* flight_code;
-	clock date_departure;
-	char* booking_code;
-	int res_num;
-} booking;
+	char id[ID_LENGTH];
+	char country[MAX_COUNTRY_LENGTH];
+	char city[MAX_CITY_LENGTH];
+	int departures;
+} airport;
 
 typedef struct {
 	char* flight_code;
@@ -102,11 +101,11 @@ typedef struct {
 } flight;
 
 typedef struct {
-	char id[ID_LENGTH];
-	char country[MAX_COUNTRY_LENGTH];
-	char city[MAX_CITY_LENGTH];
-	int departures;
-} airport;
+	char* flight_code;
+	clock date_departure;
+	char* booking_code;
+	int res_num;
+} booking;
 
 typedef struct {
 	int totalAirports; 					/* tracks the total amount of airports added by the user */
@@ -161,23 +160,25 @@ void PrintAirport(airport airport_1);
 
 /* flights.c */
 
-void ReadFlight(flight *new_flight);
+flight* ReadFlight();
+
+void ListAllFlights(global_store* global);
 
 int CheckAddFlightErrors(global_store* global, flight* new_flight);
 
-int CheckFlightCodeErrors(const char flight_code[]);
+int CheckFlightCodeErrors(char* flight_code);
 
-int CheckDuplicateFlight(global_store* global, flight* flight_1);
+flight* GetFlight(global_store* global, char* flight_code, clock date_departure);
+
+int CheckFlightCodeExistence(global_store* global, char* flight_code);
 
 char* GetFlightKey(void* flight_1);
 
 void ClearFlight(void* flight_delete);
 
-void ListAllFlights(global_store* global);
+void PrintFlights(node_t* flight_head, const int mode);
 
-flight* GetFlight(global_store* global, char* flight_code, clock date_departure);
-
-int CheckFlightExistence(global_store* global, char* flight_code);
+void RemoveFlights(global_store* global, char* flight_code);
 
 /* dates.c */
 
@@ -217,24 +218,32 @@ int IsUpperCase(char c);
 
 int IsDigit(char c);
 
-void swap_vars(void** a, void** b);
-
 /* bookings.c */
 
-booking* ReadBooking();
+booking* ReadBooking(char* flight_code, clock date);
+
+void AddBooking(global_store* global, char* flight_code, clock date);
+
+void ListBookings(global_store* global, char* flight_code, clock date);
 
 int CheckAddBookingErrors(global_store* global, booking* new_booking);
 
 int CheckBookingCodeErrors(char* booking_code);
 
-void ListBookings(global_store* global, char* flight_code, clock date);
+int CheckListBookingsErrors(global_store* global, char* flight_code, clock date);
 
-int CompareBookings(void* booking_1, void* booking_2);
+booking* GetBooking(global_store* global, char* booking_code);
 
 char* GetBookingKey(void* booking_1);
 
 void ClearBooking(void* booking_delete);
 
-booking* GetBooking(char* booking_code);
+int CompareBookings(void* booking_1, void* booking_2);
+
+void PrintBookings(node_t* booking_head);
+
+void RemoveBooking(global_store* global, char* booking_code);
+
+void RemoveAllBookings(global_store* global);
 
 #endif

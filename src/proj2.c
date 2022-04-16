@@ -18,8 +18,6 @@
 void AddBooking_ListBookings(global_store* global) {
 	char flight_code[MAX_FLIGHT_CODE_LENGTH], calendar_date[DATE_LENGTH];
 	int state;
-	booking* new_booking;
-	flight* flight_1;
 	clock date;
 
 	GetOneArgument(flight_code, 0);
@@ -29,20 +27,10 @@ void AddBooking_ListBookings(global_store* global) {
 	if (state == 1) {
 		ListBookings(global, flight_code, date);
 		return;
-	}
-
-	new_booking = ReadBooking(flight_code, date);
-
-	if (CheckAddBookingErrors(global, new_booking)) {
-		ClearBooking(new_booking);
+	} else {
+		AddBooking(global, flight_code, date);
 		return;
 	}
-
-	flight_1 = GetFlight(global, flight_code, new_booking->date_departure);
-	flight_1->occupation += new_booking->res_num;
-	global->bookingsTable =
-		hashtable_insert(global->bookingsTable, new_booking,
-						GetBookingKey(new_booking), ClearBooking);
 }
 
 /**
@@ -53,19 +41,18 @@ void DeleteBooking_Flight(global_store* global) {
 
 	GetOneArgument(code, 0);
 
-	if (strlen(code) > MIN_BOOKING_CODE_LENGTH) {
-		if (hashtable_get(global->bookingsTable, code, GetBookingKey) == NULL) {
+	if (strlen(code) >= MIN_BOOKING_CODE_LENGTH) {
+		if (GetBooking(global, code) == NULL) {
 			printf(BOOKING_FLIGHT_NA);
 			return;
 		}
-		hashtable_remove(global->bookingsTable, code, GetBookingKey,
-						ClearBooking);
+		RemoveBooking(global, code);
 	} else {
-		if (!CheckFlightExistence(global, code)) {
+		if (!CheckFlightCodeExistence(global, code)) {
 			printf(BOOKING_FLIGHT_NA);
 			return;
 		}
-		list_remove(global->allFlights, code, GetFlightKey, ClearFlight);
+		RemoveFlights(global, code);
 	}
 }
 
@@ -74,7 +61,8 @@ void DeleteBooking_Flight(global_store* global) {
  */
 void ExitProgram(global_store* global) {
 	list_destroy(global->allFlights, ClearFlight);
-	hashtable_destroy(global->bookingsTable, ClearBooking);
+	RemoveAllBookings(global);
+	hashtable_destroy(global->bookingsTable);
 	free(global);
 }
 

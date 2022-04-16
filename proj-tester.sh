@@ -38,7 +38,7 @@ while getopts ":dvch" OPTION; do
             MODE="clean"
             ;;
         v)
-            WRAPPER="valgrind --error-exitcode=1 --track-origins=yes"
+            WRAPPER="valgrind -s --error-exitcode=1 --track-origins=yes --leak-check=full --show-leak-kinds=all"
             ;;
         h)
             usage
