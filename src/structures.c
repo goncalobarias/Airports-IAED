@@ -235,11 +235,12 @@ list_t* list_create() {
 /**
  *
  */
-void list_insert(list_t* list, void* data) {
+node_t* list_insert(list_t* list, void* data) {
 	node_t* new_node = SecureMalloc(sizeof(node_t));
 
 	new_node->data = data;
 	new_node->next = NULL;
+	new_node->prev = list->last;
 
 	if (list->last == NULL) {
 		list->first = new_node;
@@ -248,33 +249,26 @@ void list_insert(list_t* list, void* data) {
 	}
 
 	list->last = new_node;
+
+	return new_node;
 }
 
 /**
  *
  */
-void list_remove(list_t* list, void* key, char*(*get_key)(void*),
-				 void(*clear_data)(void*)) {
-	node_t *prev = NULL, *node_removal = list->first, *next = list->first;
-
-	for (; node_removal != NULL; node_removal = next) {
-		next = node_removal->next;
-
-		if (strcmp(get_key(node_removal->data), key) != 0) {
-			prev = node_removal;
-			continue;
+void list_remove(list_t* list, node_t* node_removal) {
+	if (node_removal != NULL) {
+		if (node_removal->prev != NULL) {
+			node_removal->prev->next = node_removal->next;
+		} else {
+			list->first = node_removal->next;
+		}
+		if (node_removal->next != NULL) {
+			node_removal->next->prev = node_removal->prev;
+		} else {
+			list->last = node_removal->prev;
 		}
 
-		if (prev != NULL) {
-			prev->next = node_removal->next;
-		} else if (prev == NULL) {
-			list->first = next;
-		}
-		if (next == NULL) {
-			list->last = prev;
-		}
-
-		clear_data(node_removal->data);
 		free(node_removal);
 	}
 }
@@ -282,7 +276,7 @@ void list_remove(list_t* list, void* key, char*(*get_key)(void*),
 /**
  *
  */
-void list_destroy(list_t* list, void(*clear_data)(void*)) {
+void list_destroy(list_t* list) {
 	node_t *p1, *p2 = list->first;
 
 	if (list->first == NULL) {
@@ -293,7 +287,6 @@ void list_destroy(list_t* list, void(*clear_data)(void*)) {
 	do {
 		p1 = p2;
 		p2 = p2->next;
-		clear_data(p1->data);
 		free(p1);
 	} while (p2 != NULL);
 
@@ -317,10 +310,14 @@ node_t* merge(node_t* first, node_t* second, int(*cmp)(void*, void*)) {
     /* gets the smaller value */
     if (cmp(first->data, second->data) < 0) {
         first->next = merge(first->next, second, cmp);
+		first->next->prev = first;
+		first->prev = NULL;
 
         return first;
     } else {
         second->next = merge(first, second->next, cmp);
+		second->next->prev = second;
+		second->prev = NULL;
 
         return second;
     }

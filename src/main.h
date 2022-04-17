@@ -94,6 +94,7 @@ typedef struct {
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
 	clock date_departure;
+	char* flight_key;
 	int duration;
 	clock date_arrival;
 	long int occupation;
@@ -109,10 +110,10 @@ typedef struct {
 
 typedef struct {
 	int totalAirports; 					/* tracks the total amount of airports added by the user */
-	int totalFlights;					/* tracks the total amount of flights added by the user */
 	airport allAirports[MAX_AIRPORTS]; 	/* stores all of the current airports */
 	int sortedAirports[MAX_AIRPORTS]; 	/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
 	list_t* allFlights;					/* */
+	hashtable* flightsTable;			/* */
 	hashtable* bookingsTable;			/* */
 	clock date;							/* stores the system date of the system */
 	clock max_date;						/* stores the date that is one year in future from the system date */
@@ -162,6 +163,8 @@ void PrintAirport(airport airport_1);
 
 flight* ReadFlight();
 
+void AddFlight(global_store* global);
+
 void ListAllFlights(global_store* global);
 
 int CheckAddFlightErrors(global_store* global, flight* new_flight);
@@ -170,15 +173,19 @@ int CheckFlightCodeErrors(char* flight_code);
 
 flight* GetFlight(global_store* global, char* flight_code, clock date_departure);
 
-int CheckFlightCodeExistence(global_store* global, char* flight_code);
+char* GetFlightKey(void* new_node);
 
-char* GetFlightKey(void* flight_1);
+char* CreateFlightKey(char* flight_code, clock date_depart);
+
+int CheckFlightCodeExistence(global_store* global, char* flight_code);
 
 void ClearFlight(void* flight_delete);
 
 void PrintFlights(node_t* flight_head, const int mode);
 
 void RemoveFlights(global_store* global, char* flight_code);
+
+void RemoveAllFlights(global_store* global);
 
 /* dates.c */
 

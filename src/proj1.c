@@ -117,29 +117,14 @@ void ListAirports(global_store* global) {
  * information.
  */
 void AddFlight_ListFlights(global_store* global) {
-	flight* new_flight;
-	int departure_airport;
-
 	/* if there is no arguments it lists all flights */
 	if (getchar() == '\n') {
 		ListAllFlights(global);
 		return;
-	}
-
-	new_flight = ReadFlight();
-
-	if (CheckAddFlightErrors(global, new_flight)) {
-		ClearFlight(new_flight);
+	} else {
+		AddFlight(global);
 		return;
 	}
-
-	/* actually add the flight to the system */
-	list_insert(global->allFlights, new_flight);
-	++global->totalFlights;
-
-	/* updates the number of departures on the departure airport */
-	departure_airport = GetAirport(global, new_flight->departure_id);
-	++global->allAirports[global->sortedAirports[departure_airport]].departures;
 }
 
 /**
@@ -240,8 +225,8 @@ global_store* GlobalInit() {
 	global_store* global = SecureMalloc(sizeof(global_store));
 
 	global->totalAirports = 0;
-	global->totalFlights = 0;
 	global->allFlights = list_create();
+	global->flightsTable = hashtable_create(HASHTABLE_START_SIZE);
 	global->bookingsTable = hashtable_create(HASHTABLE_START_SIZE);
 
 	global->date.day = 1;

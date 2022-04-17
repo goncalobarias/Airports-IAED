@@ -60,9 +60,8 @@ void DeleteBooking_Flight(global_store* global) {
  *
  */
 void ExitProgram(global_store* global) {
-	list_destroy(global->allFlights, ClearFlight);
+	RemoveAllFlights(global);
 	RemoveAllBookings(global);
-	hashtable_destroy(global->bookingsTable);
 	free(global);
 }
 

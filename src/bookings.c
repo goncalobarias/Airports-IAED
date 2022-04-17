@@ -238,4 +238,6 @@ void RemoveAllBookings(global_store* global) {
 			free(elem);
 		}
 	}
+
+	hashtable_destroy(global->bookingsTable);
 }

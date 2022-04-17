@@ -14,7 +14,7 @@
 #define MEMORY_ERR "No memory.\n"
 #define MEMORY_ERR_CODE -1
 #define HASHTABLE_MAX_LOAD 0.5
-#define HASHTABLE_START_SIZE 11
+#define HASHTABLE_START_SIZE 14969
 #define HASHTABLE_DELETED -2
 #define HASHTABLE_TAKEN -3
 
@@ -40,7 +40,7 @@ typedef struct list {
 
 typedef struct node {
 	void* data;
-	struct node *next;
+	struct node *prev, *next;
 } node_t;
 
 /**
@@ -73,11 +73,11 @@ void hashtable_destroy(hashtable* hash_t);
 
 list_t* list_create();
 
-void list_insert(list_t* list, void* data);
+node_t* list_insert(list_t* list, void* data);
 
-void list_remove(list_t* list, void* key, char*(*get_key)(void*), void(*clear_data)(void*));
+void list_remove(list_t* list, node_t* node_removal);
 
-void list_destroy(list_t* list, void(*clear_data)(void*));
+void list_destroy(list_t* list);
 
 /* merge sort */
 
