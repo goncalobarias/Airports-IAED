@@ -14,7 +14,7 @@
 #define MEMORY_ERR "No memory.\n"
 #define MEMORY_ERR_CODE -1
 #define HASHTABLE_MAX_LOAD 0.5
-#define HASHTABLE_START_SIZE 14969
+#define HASHTABLE_START_SIZE 10069
 #define HASHTABLE_DELETED -2
 #define HASHTABLE_TAKEN -3
 
@@ -24,7 +24,6 @@
 
 typedef struct hash_elem_t {
 	void* data;
-	unsigned int hash_1, hash_2;
 	int state;
 } hash_elem;
 
@@ -57,7 +56,9 @@ unsigned int* hashtable_calc_hashes(char* key, int size);
 
 hashtable* hashtable_create(int size);
 
-hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key);
+hash_elem* hashtable_element_create(void* data);
+
+hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, char*(*get_key)(void*));
 
 hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
 
@@ -65,7 +66,7 @@ void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*), void
 
 int hash_elem_dead(hash_elem* elem);
 
-hashtable* hashtable_expand(hashtable* hash_t);
+hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*));
 
 void hashtable_destroy(hashtable* hash_t);
 

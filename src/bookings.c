@@ -50,7 +50,8 @@ void AddBooking(global_store* global, char* flight_code, clock date) {
 	flight_1 = GetFlight(global, flight_code, new_booking->date_departure);
 	flight_1->occupation += new_booking->res_num;
 	global->bookingsTable = hashtable_insert(global->bookingsTable, new_booking,
-											GetBookingKey(new_booking));
+											GetBookingKey(new_booking),
+											GetBookingKey);
 }
 
 /**

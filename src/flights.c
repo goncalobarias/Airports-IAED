@@ -59,7 +59,7 @@ void AddFlight(global_store* global) {
 	/* actually add the flight to the system */
 	new_node = list_insert(global->allFlights, new_flight);
 	global->flightsTable = hashtable_insert(global->flightsTable, new_node,
-										 GetFlightKey(new_node));
+										 GetFlightKey(new_node), GetFlightKey);
 
 	/* updates the number of departures on the departure airport */
 	departure_airport = GetAirport(global, new_flight->departure_id);

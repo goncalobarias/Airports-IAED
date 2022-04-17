@@ -86,12 +86,10 @@ hashtable* hashtable_create(int size) {
 /**
  *
  */
-hash_elem* hashtable_element_create(unsigned int* hashing, void* data) {
+hash_elem* hashtable_element_create(void* data) {
 	hash_elem* elem = SecureMalloc(sizeof(hash_elem));
 
 	elem->data = data;
-	elem->hash_1 = hashing[0];
-	elem->hash_2 = hashing[1];
 	elem->state = HASHTABLE_TAKEN;
 
 	return elem;
@@ -100,26 +98,27 @@ hash_elem* hashtable_element_create(unsigned int* hashing, void* data) {
 /**
  *
  */
-hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key) {
+hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
+							char*(*get_key)(void*)) {
 	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
 	unsigned int h = hashing[0] % hash_t->size, phi = hashing[2];
 	int i = 1;
-	hash_elem* elem = hashtable_element_create(hashing, data);
-
-	free(hashing);
+	hash_elem* elem = hashtable_element_create(data);
 
 	while (hash_t->table[h] != NULL) {
 		if (hash_t->table[h]->state == HASHTABLE_DELETED) {
 			free(hash_t->table[h]);
 			break;
 		}
-		h = (elem->hash_1 + i * phi) % hash_t->size;
+		h = (hashing[0] + i * phi) % hash_t->size;
 		i++;
 	}
 	hash_t->table[h] = elem;
 
+	free(hashing);
+
 	if (++hash_t->elem_num >= hash_t->size * HASHTABLE_MAX_LOAD) {
-		hash_t = hashtable_expand(hash_t);
+		hash_t = hashtable_expand(hash_t, get_key);
 	}
 
 	return hash_t;
@@ -177,32 +176,36 @@ int hash_elem_dead(hash_elem* elem) {
 /**
  *
  */
-void hashtable_reinsert(hash_elem* elem, hashtable* new_hash_t) {
-	int h = elem->hash_1 % new_hash_t->size, i = 1;
-	int phi = elem->hash_2 % new_hash_t->size;
+void hashtable_reinsert(hash_elem* elem, hashtable* new_hash_t, char* key) {
+	unsigned int* hashing = hashtable_calc_hashes(key, new_hash_t->size);
+	int h = hashing[0] % new_hash_t->size, i = 1;
+	int phi = hashing[2];
 
 	if (phi == 0) {
 		phi = 1;
 	}
 
 	while (new_hash_t->table[h] != NULL) {
-		h = (elem->hash_1 + i * phi) % new_hash_t->size;
+		h = (hashing[0] + i * phi) % new_hash_t->size;
 		i++;
 	}
 	new_hash_t->table[h] = elem;
+
+	free(hashing);
 }
 
 /**
  *
  */
-hashtable* hashtable_expand(hashtable* hash_t) {
+hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*)) {
 	int i;
 	hashtable* new_hash_t = hashtable_create(GetPrime(hash_t->size * 2));
 
 	for (i = 0; i < hash_t->size; i++) {
 		if (hash_t->table[i] != NULL
 			&& hash_t->table[i]->state != HASHTABLE_DELETED) {
-			hashtable_reinsert(hash_t->table[i], new_hash_t);
+			hashtable_reinsert(hash_t->table[i], new_hash_t,
+					  		get_key(hash_t->table[i]->data));
 		}
 	}
 
