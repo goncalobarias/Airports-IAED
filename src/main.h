@@ -97,13 +97,13 @@ typedef struct {
 	char* flight_key;
 	int duration;
 	clock date_arrival;
+	list_t* reservations;
 	long int occupation;
 	long int capacity;
 } flight;
 
 typedef struct {
-	char* flight_code;
-	clock date_departure;
+	flight* parent_flight;
 	char* booking_code;
 	int res_num;
 } booking;
@@ -185,7 +185,7 @@ void PrintFlights(node_t* flight_head, const int mode);
 
 void RemoveFlights(global_store* global, char* flight_code);
 
-void RemoveAllFlights(global_store* global);
+void RemoveFlight(global_store* global, node_t* flight_remove);
 
 /* dates.c */
 
@@ -227,13 +227,13 @@ int IsDigit(char c);
 
 /* bookings.c */
 
-booking* ReadBooking(char* flight_code, clock date);
+booking* ReadBooking(global_store* global, char* flight_code, clock date);
 
 void AddBooking(global_store* global, char* flight_code, clock date);
 
 void ListBookings(global_store* global, char* flight_code, clock date);
 
-int CheckAddBookingErrors(global_store* global, booking* new_booking);
+int CheckAddBookingErrors(global_store* global, char* flight_code, booking* new_booking);
 
 int CheckBookingCodeErrors(char* booking_code);
 
@@ -249,8 +249,8 @@ int CompareBookings(void* booking_1, void* booking_2);
 
 void PrintBookings(node_t* booking_head);
 
-void RemoveBooking(global_store* global, char* booking_code);
+void RemoveBookings(global_store* global, list_t* reservations);
 
-void RemoveAllBookings(global_store* global);
+void RemoveBooking(global_store* global, char* booking_code);
 
 #endif

@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
-#include "structures.h"
 
 /**
  * Uses the GetOneArgument function to read all of the arguments from stdin that
@@ -32,9 +31,10 @@ flight* ReadFlight() {
 	strcpy(new_flight->flight_code, flight_code);
 
 	new_flight->date_departure = ReadClock(date, time);
-	new_flight->flight_key = CreateFlightKey(flight_code,
-							new_flight->date_departure);
+	new_flight->flight_key = CreateFlightKey(new_flight->flight_code,
+								new_flight->date_departure);
 	new_flight->duration = ReadDuration(duration);
+	new_flight->reservations = list_create();
 	new_flight->occupation = 0;
 	new_flight->capacity = atoi(capacity);
 	new_flight->date_arrival = UpdateDate(new_flight->date_departure,
@@ -48,8 +48,8 @@ flight* ReadFlight() {
  */
 void AddFlight(global_store* global) {
 	flight* new_flight = ReadFlight();
+	node_t* flight_node;
 	int departure_airport;
-	node_t* new_node;
 
 	if (CheckAddFlightErrors(global, new_flight)) {
 		ClearFlight(new_flight);
@@ -57,9 +57,9 @@ void AddFlight(global_store* global) {
 	}
 
 	/* actually add the flight to the system */
-	new_node = list_insert(global->allFlights, new_flight);
-	global->flightsTable = hashtable_insert(global->flightsTable, new_node,
-										 GetFlightKey(new_node), GetFlightKey);
+	flight_node = list_insert(global->allFlights, new_flight);
+	global->flightsTable = hashtable_insert(global->flightsTable, flight_node,
+								 	GetFlightKey(flight_node), GetFlightKey);
 
 	/* updates the number of departures on the departure airport */
 	departure_airport = GetAirport(global, new_flight->departure_id);
@@ -150,31 +150,30 @@ int CheckFlightCodeErrors(char* flight_code) {
  */
 flight* GetFlight(global_store* global, char* flight_code, clock date_depart) {
 	char* flight_key = CreateFlightKey(flight_code, date_depart);
+	node_t* flight_node;
 	hash_elem* elem =
 		hashtable_get(global->flightsTable, flight_key, GetFlightKey);
-	node_t* flight_node;
-	flight* flight_return;
+	if (elem != NULL && elem->state == HASHTABLE_DELETED) {
+		printf("cock\n");
+	}
 
 	free(flight_key);
 
 	if (elem == NULL) {
 		return NULL;
+	} else {
+		flight_node = (node_t*)elem->data;
+		return (flight*)flight_node->data;
 	}
-
-	flight_node = (node_t*)elem->data;
-	flight_return = (flight*)flight_node->data;
-
-	return (flight_return);
 }
 
 /**
  *
  */
-char* GetFlightKey(void* new_node) {
-	node_t* flight_node = new_node;
-	flight* flight_get_key = flight_node->data;
+char* GetFlightKey(void* flight_node) {
+	flight* flight_get = ((node_t*)flight_node)->data;
 
-	return (flight_get_key->flight_key);
+	return flight_get->flight_key;
 }
 
 /**
@@ -190,7 +189,7 @@ char* CreateFlightKey(char* flight_code, clock date_depart) {
 		 				date_depart.month,
 		 				date_depart.year);
 
-	return (flight_key);
+	return flight_key;
 }
 
 /**
@@ -213,10 +212,13 @@ int CheckFlightCodeExistence(global_store* global, char* flight_code) {
 /**
  *
  */
-void ClearFlight(void* flight_delete) {
-	free(((flight*)flight_delete)->flight_code);
-	free(((flight*)flight_delete)->flight_key);
-	free((flight*)flight_delete);
+void ClearFlight(void* tmp_flight) {
+	flight* flight_delete = tmp_flight;
+
+	free(flight_delete->reservations);
+	free(flight_delete->flight_code);
+	free(flight_delete->flight_key);
+	free(flight_delete);
 }
 
 /**
@@ -244,32 +246,14 @@ void PrintFlights(node_t* flight_head, const int mode) {
  *
  */
 void RemoveFlights(global_store* global, char* flight_code) {
-	int i;
-	node_t* tmp_node;
-	flight* tmp_flight;
-	booking* tmp_booking;
+	node_t *p, *aux;
+	flight* flight_delete;
 
-	for (i = 0; i < global->flightsTable->size; i++) {
-		if (hash_elem_dead(global->flightsTable->table[i])) {
-			continue;
-		}
-		tmp_node = (node_t*)global->flightsTable->table[i]->data;
-		tmp_flight = (flight*)tmp_node->data;
-		if (strcmp(tmp_flight->flight_code, flight_code) == 0) {
-			ClearFlight(tmp_flight);
-			list_remove(global->allFlights, tmp_node);
-			global->flightsTable->table[i]->state = HASHTABLE_DELETED;
-		}
-	}
-
-	for (i = 0; i < global->bookingsTable->size; i++) {
-		if (hash_elem_dead(global->bookingsTable->table[i])) {
-			continue;
-		}
-		tmp_booking = (booking*)global->bookingsTable->table[i]->data;
-		if (strcmp(tmp_booking->flight_code, flight_code) == 0) {
-			hashtable_remove(global->bookingsTable, tmp_booking->booking_code,
-							GetBookingKey, ClearBooking);
+	for (p = global->allFlights->first; p != NULL; p = aux) {
+		aux = p->next;
+		flight_delete = (flight*)p->data;
+		if (strcmp(flight_delete->flight_code, flight_code) == 0) {
+			RemoveFlight(global, p);
 		}
 	}
 }
@@ -277,28 +261,12 @@ void RemoveFlights(global_store* global, char* flight_code) {
 /**
  *
  */
-void RemoveAllFlights(global_store* global) {
-	flight* tmp_flight;
-	node_t* tmp_node;
-	hash_elem* elem;
-	int i;
+void RemoveFlight(global_store* global, node_t* flight_node) {
+	flight* flight_delete = flight_node->data;
 
-	for (i = 0; i < global->flightsTable->size; i++) {
-		elem = global->flightsTable->table[i];
-		if (elem == NULL) {
-			continue;
-		} else if (elem->state == HASHTABLE_DELETED) {
-			free(elem);
-		} else {
-			tmp_node = (node_t*)elem->data;
-			tmp_flight = (flight*)tmp_node->data;
-			ClearFlight(tmp_flight);
-			list_remove(global->allFlights, tmp_node);
-			free(elem);
-		}
-	}
-
-	free(global->allFlights);
-
-	hashtable_destroy(global->flightsTable);
+	RemoveBookings(global, flight_delete->reservations);
+	hashtable_remove(global->flightsTable, GetFlightKey(flight_node),
+				  	GetFlightKey);
+	list_remove(global->allFlights, flight_node);
+	ClearFlight(flight_delete);
 }

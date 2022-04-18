@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
-#include "structures.h"
 
 /*		Hashtables		*/
 
@@ -149,8 +148,7 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 /**
  *
  */
-void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*),
-					  void(*clear_data)(void*)) {
+void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 	hash_elem* remove_elem = hashtable_get(hash_t, key, get_key);
 
 	if (remove_elem == NULL) {
@@ -159,7 +157,6 @@ void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*),
 
 	remove_elem->state = HASHTABLE_DELETED;
 	--hash_t->elem_num;
-	clear_data(remove_elem->data);
 }
 
 /**
@@ -176,27 +173,6 @@ int hash_elem_dead(hash_elem* elem) {
 /**
  *
  */
-void hashtable_reinsert(hash_elem* elem, hashtable* new_hash_t, char* key) {
-	unsigned int* hashing = hashtable_calc_hashes(key, new_hash_t->size);
-	int h = hashing[0] % new_hash_t->size, i = 1;
-	int phi = hashing[2];
-
-	if (phi == 0) {
-		phi = 1;
-	}
-
-	while (new_hash_t->table[h] != NULL) {
-		h = (hashing[0] + i * phi) % new_hash_t->size;
-		i++;
-	}
-	new_hash_t->table[h] = elem;
-
-	free(hashing);
-}
-
-/**
- *
- */
 hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*)) {
 	int i;
 	hashtable* new_hash_t = hashtable_create(GetPrime(hash_t->size * 2));
@@ -204,8 +180,8 @@ hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*)) {
 	for (i = 0; i < hash_t->size; i++) {
 		if (hash_t->table[i] != NULL
 			&& hash_t->table[i]->state != HASHTABLE_DELETED) {
-			hashtable_reinsert(hash_t->table[i], new_hash_t,
-					  		get_key(hash_t->table[i]->data));
+			hashtable_insert(new_hash_t, hash_t->table[i]->data,
+					  		get_key(hash_t->table[i]->data), get_key);
 		}
 	}
 
@@ -218,6 +194,13 @@ hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*)) {
  *
  */
 void hashtable_destroy(hashtable* hash_t) {
+	int i;
+
+	for (i = 0; i < hash_t->size; i++) {
+		if (hash_t->table[i] != NULL) {
+			free(hash_t->table[i]);
+		}
+	}
 	free(hash_t->table);
 	free(hash_t);
 }
@@ -231,6 +214,7 @@ list_t* list_create() {
 	list_t* new_list = SecureMalloc(sizeof(list_t));
 	new_list->first = NULL;
 	new_list->last = NULL;
+	new_list->sorted = LIST_UNSORTED;
 
 	return new_list;
 }
@@ -252,6 +236,9 @@ node_t* list_insert(list_t* list, void* data) {
 	}
 
 	list->last = new_node;
+	if (list->sorted != LIST_UNSORTED) {
+		list->sorted = LIST_UNSORTED;
+	}
 
 	return new_node;
 }
@@ -276,27 +263,24 @@ void list_remove(list_t* list, node_t* node_removal) {
 	}
 }
 
-/**
- *
- */
-void list_destroy(list_t* list) {
-	node_t *p1, *p2 = list->first;
+/*		Merge Sort Implementation		*/
 
-	if (list->first == NULL) {
-		free(list);
+void sort_list(list_t* list, int(*cmp)(void*, void*)) {
+	node_t* p;
+
+	if (list->first == NULL || list->sorted == LIST_SORTED) {
 		return;
+	} else if (list->sorted != LIST_SORTED) {
+		list->sorted = LIST_SORTED;
 	}
 
-	do {
-		p1 = p2;
-		p2 = p2->next;
-		free(p1);
-	} while (p2 != NULL);
+	list->first = list_mergesort(list->first, cmp);
 
-	free(list);
+	for (p = list->last; p->next != NULL; p = p->next) {
+	}
+
+	list->last = p;
 }
-
-/*		Merge Sort Implementation		*/
 
 /**
  *

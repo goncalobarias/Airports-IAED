@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
-#include "structures.h"
 
 /**
  *
@@ -60,8 +59,15 @@ void DeleteBooking_Flight(global_store* global) {
  *
  */
 void ExitProgram(global_store* global) {
-	RemoveAllFlights(global);
-	RemoveAllBookings(global);
+	node_t *p, *aux;
+
+	for (p = global->allFlights->first; p != NULL; p = aux) {
+		aux = p->next;
+		RemoveFlight(global, p);
+	}
+	free(global->allFlights);
+	hashtable_destroy(global->flightsTable);
+	hashtable_destroy(global->bookingsTable);
 	free(global);
 }
 

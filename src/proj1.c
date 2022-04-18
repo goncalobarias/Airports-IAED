@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
-#include "structures.h"
 
 int main() {
 	/* initializes the global variables store */
@@ -134,7 +133,7 @@ void AddFlight_ListFlights(global_store* global) {
  */
 void FlightDeparturesInAirport(global_store* global) {
 	char id[ID_LENGTH];
-	node_t* p1;
+	node_t* p;
 	list_t* tmp_list;
 	flight* tmp_flight;
 
@@ -146,17 +145,18 @@ void FlightDeparturesInAirport(global_store* global) {
 
 	tmp_list = list_create();
 
-	for (p1 = global->allFlights->first; p1 != NULL; p1 = p1->next) {
-		tmp_flight = (flight*)p1->data;
+	for (p = global->allFlights->first; p != NULL; p = p->next) {
+		tmp_flight = (flight*)p->data;
 		/* looks at the sorted flights to find the ones linked to the right */
 		/* departure id */
-		if (strcmp(tmp_flight->departure_id, id) == 0)
+		if (strcmp(tmp_flight->departure_id, id) == 0) {
 			list_insert(tmp_list, tmp_flight);
+		}
 	}
 
-	p1 = list_mergesort(tmp_list->first, CompareFlightDatesDeparture);
+	sort_list(tmp_list, CompareFlightDatesDeparture);
 
-	PrintFlights(p1, 0);
+	PrintFlights(tmp_list->first, 0);
 
 	free(tmp_list);
 }
@@ -168,7 +168,7 @@ void FlightDeparturesInAirport(global_store* global) {
  */
 void FlightArrivalsInAirport(global_store* global) {
 	char id[ID_LENGTH];
-	node_t* p1;
+	node_t* p;
 	list_t* tmp_list;
 	flight* tmp_flight;
 
@@ -180,17 +180,18 @@ void FlightArrivalsInAirport(global_store* global) {
 
 	tmp_list = list_create();
 
-	for (p1 = global->allFlights->first; p1 != NULL; p1 = p1->next) {
-		tmp_flight = (flight*)p1->data;
+	for (p = global->allFlights->first; p != NULL; p = p->next) {
+		tmp_flight = (flight*)p->data;
 		/* looks at the sorted flights to find the ones linked to the right */
 		/* arrival id */
-		if (strcmp(tmp_flight->arrival_id, id) == 0)
+		if (strcmp(tmp_flight->arrival_id, id) == 0) {
 			list_insert(tmp_list, tmp_flight);
+		}
 	}
 
-	p1 = list_mergesort(tmp_list->first, CompareFlightDatesArrival);
+	sort_list(tmp_list, CompareFlightDatesArrival);
 
-	PrintFlights(p1, 1);
+	PrintFlights(tmp_list->first, 1);
 
 	free(tmp_list);
 }

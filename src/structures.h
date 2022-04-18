@@ -17,6 +17,8 @@
 #define HASHTABLE_START_SIZE 10069
 #define HASHTABLE_DELETED -2
 #define HASHTABLE_TAKEN -3
+#define LIST_SORTED -4
+#define LIST_UNSORTED -5
 
 /**
  * Data structures
@@ -35,6 +37,7 @@ typedef struct hashtable_t {
 
 typedef struct list {
 	struct node *first, *last;
+	int sorted;
 } list_t;
 
 typedef struct node {
@@ -62,7 +65,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, char*(*get
 
 hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
 
-void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*), void(*clear_data)(void*));
+void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*));
 
 int hash_elem_dead(hash_elem* elem);
 
@@ -78,9 +81,9 @@ node_t* list_insert(list_t* list, void* data);
 
 void list_remove(list_t* list, node_t* node_removal);
 
-void list_destroy(list_t* list);
-
 /* merge sort */
+
+void sort_list(list_t* list, int(*cmp)(void*, void*));
 
 node_t* merge(node_t* first, node_t* second, int(*cmp)(void*, void*));
 
