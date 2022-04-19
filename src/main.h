@@ -93,10 +93,10 @@ typedef struct {
 	char* flight_code;
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
-	clock date_departure;
-	char* flight_key;
+	clock* date_departure;
+	char* calendar_date;
 	int duration;
-	clock date_arrival;
+	clock* date_arrival;
 	list_t* reservations;
 	long int occupation;
 	long int capacity;
@@ -115,8 +115,7 @@ typedef struct {
 	list_t* allFlights;					/* */
 	hashtable* flightsTable;			/* */
 	hashtable* bookingsTable;			/* */
-	clock date;							/* stores the system date of the system */
-	clock max_date;						/* stores the date that is one year in future from the system date */
+	clock* date;						/* stores the system date of the system */
 } global_store;
 
 /**
@@ -125,7 +124,7 @@ typedef struct {
 
 /* proj1.c */
 
-int HandleCommands(global_store* global);
+int HandleCommands(global_store* global, char command);
 
 void AddAirport(global_store* global);
 
@@ -171,11 +170,13 @@ int CheckAddFlightErrors(global_store* global, flight* new_flight);
 
 int CheckFlightCodeErrors(char* flight_code);
 
-flight* GetFlight(global_store* global, char* flight_code, clock date_departure);
+flight* GetFlight(global_store* global, char* flight_code, clock* date_departure);
 
-char* GetFlightKey(void* new_node);
+char* GetFlightCode(void* flight_node);
 
-char* CreateFlightKey(char* flight_code, clock date_depart);
+char* GetFlightCalendarDate(void* flight_node);
+
+char* GetCalendarDate(char* flight_code, clock* date);
 
 int CheckFlightCodeExistence(global_store* global, char* flight_code);
 
@@ -189,23 +190,23 @@ void RemoveFlight(global_store* global, node_t* flight_remove);
 
 /* dates.c */
 
-int CheckDateErrors(global_store* global, clock date_depart);
+int CheckDateErrors(global_store* global, clock* date_depart);
 
-int ConvertDatesToMins(clock formatted_date);
+int ConvertDatesToMins(clock* formatted_date);
 
-clock UpdateDate(clock date, int duration);
+clock* UpdateDate(clock* date, int duration);
 
-int CompareDates(clock date_1, clock date_2, const int mode);
+int CompareDates(clock* date_1, clock* date_2, const int mode);
 
 int CompareFlightDatesDeparture(void* flight_1, void* flight_2);
 
 int CompareFlightDatesArrival(void* flight_1, void* flight_2);
 
-clock ReadClock(char calendar_date[], char hours_mins[]);
+clock* ReadClock(char calendar_date[], char hours_mins[]);
 
 int ReadDuration(char duration[]);
 
-void PrintClock(clock date);
+void PrintClock(clock* date);
 
 /* proj2.c */
 
@@ -227,17 +228,17 @@ int IsDigit(char c);
 
 /* bookings.c */
 
-booking* ReadBooking(global_store* global, char* flight_code, clock date);
+booking* ReadBooking(global_store* global, char* flight_code, clock* date);
 
-void AddBooking(global_store* global, char* flight_code, clock date);
+void AddBooking(global_store* global, char* flight_code, clock* date);
 
-void ListBookings(global_store* global, char* flight_code, clock date);
+void ListBookings(global_store* global, char* flight_code, clock* date);
 
 int CheckAddBookingErrors(global_store* global, char* flight_code, booking* new_booking);
 
 int CheckBookingCodeErrors(char* booking_code);
 
-int CheckListBookingsErrors(global_store* global, char* flight_code, clock date);
+int CheckListBookingsErrors(global_store* global, char* flight_code, clock* date);
 
 booking* GetBooking(global_store* global, char* booking_code);
 

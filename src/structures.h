@@ -63,9 +63,11 @@ hash_elem* hashtable_element_create(void* data);
 
 hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key, char*(*get_key)(void*));
 
-hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*));
+hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*));
 
-void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*));
+list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*));
+
+void hashtable_remove(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*));
 
 int hash_elem_dead(hash_elem* elem);
 

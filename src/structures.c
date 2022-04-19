@@ -126,7 +126,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
 /**
  *
  */
-hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
+hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*)) {
 	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
 	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0], phi = hashing[2];
 	int i = 1;
@@ -135,7 +135,7 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 
 	while (hash_t->table[h] != NULL) {
 		if (hash_t->table[h]->state != HASHTABLE_DELETED
-			&& strcmp(get_key(hash_t->table[h]->data), key) == 0) {
+			&& strcmp(get_cmp_val(hash_t->table[h]->data), cmp_val) == 0) {
 			return hash_t->table[h];
 		}
 		h = (hash_1 + i * phi) % hash_t->size;
@@ -148,8 +148,31 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
 /**
  *
  */
-void hashtable_remove(hashtable* hash_t, char* key, char*(*get_key)(void*)) {
-	hash_elem* remove_elem = hashtable_get(hash_t, key, get_key);
+list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*)) {
+	list_t* all_elems = list_create();
+	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
+	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0], phi = hashing[2];
+	int i = 1;
+
+	free(hashing);
+
+	while (hash_t->table[h] != NULL) {
+		if (hash_t->table[h]->state != HASHTABLE_DELETED
+			&& strcmp(get_cmp_val(hash_t->table[h]->data), cmp_val) == 0) {
+			list_insert(all_elems, hash_t->table[h]->data);
+		}
+		h = (hash_1 + i * phi) % hash_t->size;
+		i++;
+	}
+
+	return (all_elems->first == NULL ? NULL : all_elems);
+}
+
+/**
+ *
+ */
+void hashtable_remove(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*)) {
+	hash_elem* remove_elem = hashtable_get(hash_t, key, cmp_val, get_cmp_val);
 
 	if (remove_elem == NULL) {
 		return;

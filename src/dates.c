@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "main.h"
 
 const int days_months_ac[MONTHS] = 			/* stores the accumulated days per month in a non leap year (jan = 1) */
@@ -15,12 +16,22 @@ const int days_months_ac[MONTHS] = 			/* stores the accumulated days per month i
  * If it's invalid it returns 1, otherwise it returns 0.
  * Auxiliary function of the 't' command.
  */
-int CheckDateErrors(global_store* global, clock date_depart) {
+int CheckDateErrors(global_store* global, clock* date_depart) {
+	clock* max_date = SecureMalloc(sizeof(clock));
+
+	max_date->year = global->date->year + 1;
+	max_date->month = global->date->month;
+	max_date->day = global->date->day;
+	max_date->hours = global->date->hours;
+	max_date->minutes = global->date->minutes;
+
 	if (CompareDates(global->date, date_depart, 1) > 0
-		|| CompareDates(global->max_date, date_depart, 0) < 0) {
+		|| CompareDates(max_date, date_depart, 0) < 0) {
+		free(max_date);
 		return 1;
 	}
 
+	free(max_date);
 	return 0;
 }
 
@@ -29,22 +40,22 @@ int CheckDateErrors(global_store* global, clock date_depart) {
  * program (01-01-2022). If the date is before the start of the program the
  * number will be negative.
  */
-int ConvertDatesToMins(clock formatted_date) {
+int ConvertDatesToMins(clock* formatted_date) {
 	int mins = 0, year_difference;
 
 	/* calculates the relative year in minutes */
-	year_difference = formatted_date.year - 2022;
+	year_difference = formatted_date->year - 2022;
 	mins += year_difference * MINS_YEAR;
 
 	/* calculates the relative month in minutes */
-	mins += days_months_ac[formatted_date.month - 1] * MINS_DAY;
+	mins += days_months_ac[formatted_date->month - 1] * MINS_DAY;
 
 	/* calculats the relative day in minutes */
-	mins += (formatted_date.day - 1) * MINS_DAY;
+	mins += (formatted_date->day - 1) * MINS_DAY;
 
 	/* calculates the relative hour in minutes and adds the rest into relative minutes */
-	mins += formatted_date.hours * MINS_HOUR;
-	mins += formatted_date.minutes;
+	mins += formatted_date->hours * MINS_HOUR;
+	mins += formatted_date->minutes;
 
 	return mins;
 }
@@ -54,30 +65,31 @@ int ConvertDatesToMins(clock formatted_date) {
  * Transforms the date into minutes and adds the duration to it, then it
  * converts the new date in minutes into a proper formatted date.
  */
-clock UpdateDate(clock date, int duration) {
+clock* UpdateDate(clock* date, int duration) {
 	int date_departure_mins = ConvertDatesToMins(date);
 	int updated_date_mins = date_departure_mins + duration, i = 1;
+	clock* new_date = SecureMalloc(sizeof(clock));
 
 	/* updates the year */
-	date.year += updated_date_mins / MINS_YEAR;
+	new_date->year = date->year + updated_date_mins / MINS_YEAR;
 	updated_date_mins = updated_date_mins % MINS_YEAR;
 
 	/* updates the month */
 	while (i <= 11 && updated_date_mins >= days_months_ac[i] * MINS_DAY) {
 		i++;
 	}
-	date.month = i;
+	new_date->month = i;
 	updated_date_mins -= days_months_ac[i - 1] * MINS_DAY;
 
 	/* updates the day */
-	date.day = updated_date_mins / MINS_DAY + 1;
+	new_date->day = updated_date_mins / MINS_DAY + 1;
 	updated_date_mins = updated_date_mins % MINS_DAY;
 
 	/* updates the hours and minutes */
-	date.hours = updated_date_mins / MINS_HOUR;
-	date.minutes = updated_date_mins % MINS_HOUR;
+	new_date->hours = updated_date_mins / MINS_HOUR;
+	new_date->minutes = updated_date_mins % MINS_HOUR;
 
-	return date;
+	return new_date;
 }
 
 /**
@@ -86,13 +98,13 @@ clock UpdateDate(clock date, int duration) {
  * minutes. Returns 1 if the second date is bigger then the first on, 0 if
  * both are equal dates or -1 if the first date is bigger then the second.
  */
-int CompareDates(clock date_1, clock date_2, const int mode) {
+int CompareDates(clock* date_1, clock* date_2, const int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
 	int date_2_mins = ConvertDatesToMins(date_2);
 
 	/* if the mode is 0, two dates will be equal if they are on the same day */
-	if (mode == 0 && date_1.month == date_2.month
-		&& date_1.day == date_2.day && date_1.year == date_2.year) {
+	if (mode == 0 && date_1->month == date_2->month
+		&& date_1->day == date_2->day && date_1->year == date_2->year) {
 		return 0;
 	}
 
@@ -122,16 +134,16 @@ int CompareFlightDatesArrival(void* flight_1, void* flight_2) {
 /**
  * Reads the clock and retrives a formatted date.
  */
-clock ReadClock(char calendar_date[], char hours_mins[]) {
-	clock date;
+clock* ReadClock(char calendar_date[], char hours_mins[]) {
+	clock* date = SecureMalloc(sizeof(clock));
 	char hifen[1], double_dots[1];
 
 	/* reads the calendar date */
-	sscanf(calendar_date, "%d%c%d%c%d", &date.day, hifen, &date.month, hifen,
-										&date.year);
+	sscanf(calendar_date, "%d%c%d%c%d", &date->day, hifen, &date->month, hifen,
+										&date->year);
 
 	/* reads the time */
-	sscanf(hours_mins, "%d%c%d", &date.hours, double_dots, &date.minutes);
+	sscanf(hours_mins, "%d%c%d", &date->hours, double_dots, &date->minutes);
 
 	return date;
 }
@@ -154,7 +166,7 @@ int ReadDuration(char duration[]) {
 /**
  * Receives a date and prints it in a proper formatted way.
  */
-void PrintClock(clock date) {
-	printf(DATE_FULL_PRINT, date.day, date.month, date.year, date.hours,
-							date.minutes);
+void PrintClock(clock* date) {
+	printf(DATE_FULL_PRINT, date->day, date->month, date->year, date->hours,
+							date->minutes);
 }

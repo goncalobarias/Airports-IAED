@@ -14,9 +14,18 @@
 int main() {
 	/* initializes the global variables store */
 	global_store* global = GlobalInit();
+	char command = getchar();
+
+	if (command == EOF) {
+		return 0;
+	}
 
 	/* executes the program until the user inserts the 'q' command */
-	while (HandleCommands(global)) {
+	while (HandleCommands(global, command)) {
+		command = getchar();
+		if (command == EOF) {
+			return 0;
+		}
 	}
 
 	/* clear all of the memory and terminate program */
@@ -31,8 +40,7 @@ int main() {
  * Returns 1 if the program should continue, otherwise it returns 0 in
  * order to exit the program.
  */
-int HandleCommands(global_store* global) {
-	char command = getchar();
+int HandleCommands(global_store* global, char command) {
 	switch(command) {
 		case 'q': /* 'q' command exits the program */
 			return 0;
@@ -202,21 +210,21 @@ void FlightArrivalsInAirport(global_store* global) {
  */
 void AdvanceSystemDate(global_store* global) {
 	char date[DATE_LENGTH];
-	clock new_date;
+	clock* new_date;
 
 	GetOneArgument(date, 0);
 	new_date = ReadClock(date, START_DAY);
 
 	if (CheckDateErrors(global, new_date)) {
 		printf(DATE_ERR_INVALID);
+		free(new_date);
 		return;
 	}
 
+	free(global->date);
 	global->date = new_date;
-	global->max_date = new_date;
-	++global->max_date.year; /* sets the max date one year in the future */
 
-	printf(DATE_PRINT, global->date.day, global->date.month, global->date.year);
+	printf(DATE_PRINT, global->date->day, global->date->month, global->date->year);
 }
 
 /**
@@ -224,23 +232,18 @@ void AdvanceSystemDate(global_store* global) {
  */
 global_store* GlobalInit() {
 	global_store* global = SecureMalloc(sizeof(global_store));
+	global->date = SecureMalloc(sizeof(clock));
 
 	global->totalAirports = 0;
 	global->allFlights = list_create();
 	global->flightsTable = hashtable_create(HASHTABLE_START_SIZE);
 	global->bookingsTable = hashtable_create(HASHTABLE_START_SIZE);
 
-	global->date.day = 1;
-	global->date.month = 1;
-	global->date.year = 2022;
-	global->date.hours = 0;
-	global->date.minutes = 0;
-
-	global->max_date.day = 1;
-	global->max_date.month = 1;
-	global->max_date.year = 2023;
-	global->max_date.hours = 0;
-	global->max_date.minutes = 0;
+	global->date->day = 1;
+	global->date->month = 1;
+	global->date->year = 2022;
+	global->date->hours = 0;
+	global->date->minutes = 0;
 
 	return global;
 }

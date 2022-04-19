@@ -17,7 +17,7 @@
 void AddBooking_ListBookings(global_store* global) {
 	char flight_code[MAX_FLIGHT_CODE_LENGTH], calendar_date[DATE_LENGTH];
 	int state;
-	clock date;
+	clock* date;
 
 	GetOneArgument(flight_code, 0);
 	state = GetOneArgument(calendar_date, 0);
@@ -68,6 +68,7 @@ void ExitProgram(global_store* global) {
 	free(global->allFlights);
 	hashtable_destroy(global->flightsTable);
 	hashtable_destroy(global->bookingsTable);
+	free(global->date);
 	free(global);
 }
 
