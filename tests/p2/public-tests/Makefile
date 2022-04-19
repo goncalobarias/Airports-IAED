@@ -3,7 +3,7 @@
 MAKEFLAGS += --no-print-directory # No entering and leaving messages
 OK="\e[1;32mtest $< PASSED\e[0m"
 KO="\e[1;31mtest $< FAILED\e[0m"
-EXE=../proj2
+EXE=../../../src/proj2
 
 all:: clean # run regression tests
 	@$(MAKE) $(MFLAGS) `ls *.in | sed -e "s/in/diff/"`
