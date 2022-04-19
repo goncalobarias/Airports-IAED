@@ -126,9 +126,11 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
 /**
  *
  */
-hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*)) {
+hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val,
+						 char*(*get_cmp_val)(void*)) {
 	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
-	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0], phi = hashing[2];
+	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0];
+	unsigned int phi = hashing[2];
 	int i = 1;
 
 	free(hashing);
@@ -148,10 +150,12 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val, char*(*get
 /**
  *
  */
-list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*)) {
+list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val,
+						  char*(*get_cmp_val)(void*)) {
 	list_t* all_elems = list_create();
 	unsigned int* hashing = hashtable_calc_hashes(key, hash_t->size);
-	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0], phi = hashing[2];
+	unsigned int h = hashing[0] % hash_t->size, hash_1 = hashing[0];
+	unsigned int phi = hashing[2];
 	int i = 1;
 
 	free(hashing);
@@ -171,7 +175,8 @@ list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val, char*(*ge
 /**
  *
  */
-void hashtable_remove(hashtable* hash_t, char* key, char* cmp_val, char*(*get_cmp_val)(void*)) {
+void hashtable_remove(hashtable* hash_t, char* key, char* cmp_val,
+					  char*(*get_cmp_val)(void*)) {
 	hash_elem* remove_elem = hashtable_get(hash_t, key, cmp_val, get_cmp_val);
 
 	if (remove_elem == NULL) {
@@ -286,8 +291,18 @@ void list_remove(list_t* list, node_t* node_removal) {
 	}
 }
 
+/**
+ *
+ */
+void list_destroy(list_t* list) {
+	free(list);
+}
+
 /*		Merge Sort Implementation		*/
 
+/**
+ *
+ */
 void sort_list(list_t* list, int(*cmp)(void*, void*)) {
 	node_t* p;
 

@@ -119,16 +119,22 @@ int CompareDates(clock* date_1, clock* date_2, const int mode) {
  * Receives two flights and compares the departure dates of the two flights.
  */
 int CompareFlightDatesDeparture(void* flight_1, void* flight_2) {
-	return CompareDates(((flight*)flight_1)->date_departure,
-					 ((flight*)flight_2)->date_departure, 1);
+	flight* flight_cmp_1 = flight_1;
+	flight* flight_cmp_2 = flight_2;
+
+	return CompareDates(flight_cmp_1->date_departure,
+					 	flight_cmp_2->date_departure, 1);
 }
 
 /**
  * Receives two flights and compares the arrival dates of the two flights.
  */
 int CompareFlightDatesArrival(void* flight_1, void* flight_2) {
-	return CompareDates(((flight*)flight_1)->date_arrival,
-					 ((flight*)flight_2)->date_arrival, 1);
+	flight* flight_cmp_1 = flight_1;
+	flight* flight_cmp_2 = flight_2;
+
+	return CompareDates(flight_cmp_1->date_arrival,
+					 	flight_cmp_2->date_arrival, 1);
 }
 
 /**

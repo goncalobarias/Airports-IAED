@@ -12,20 +12,14 @@
 #include "main.h"
 
 int main() {
+	char command;
+
 	/* initializes the global variables store */
 	global_store* global = GlobalInit();
-	char command = getchar();
 
-	if (command == EOF) {
-		return 0;
-	}
-
-	/* executes the program until the user inserts the 'q' command */
-	while (HandleCommands(global, command)) {
-		command = getchar();
-		if (command == EOF) {
-			return 0;
-		}
+	/* executes the program until the user inserts the 'q' command or reaches the EOF */
+	while ((command = getchar()) != 'q' && command != EOF) {
+		HandleCommands(global, command);
 	}
 
 	/* clear all of the memory and terminate program */
@@ -42,8 +36,6 @@ int main() {
  */
 int HandleCommands(global_store* global, char command) {
 	switch(command) {
-		case 'q': /* 'q' command exits the program */
-			return 0;
 		case 'a': AddAirport(global);
 			return 1;
 		case 'l': ListAirports(global);
@@ -141,7 +133,7 @@ void AddFlight_ListFlights(global_store* global) {
  */
 void FlightDeparturesInAirport(global_store* global) {
 	char id[ID_LENGTH];
-	node_t* p;
+	node_t* ptr;
 	list_t* tmp_list;
 	flight* tmp_flight;
 
@@ -153,8 +145,8 @@ void FlightDeparturesInAirport(global_store* global) {
 
 	tmp_list = list_create();
 
-	for (p = global->allFlights->first; p != NULL; p = p->next) {
-		tmp_flight = (flight*)p->data;
+	for (ptr = global->allFlights->first; ptr != NULL; ptr = ptr->next) {
+		tmp_flight = (flight*)ptr->data;
 		/* looks at the sorted flights to find the ones linked to the right */
 		/* departure id */
 		if (strcmp(tmp_flight->departure_id, id) == 0) {
@@ -166,7 +158,7 @@ void FlightDeparturesInAirport(global_store* global) {
 
 	PrintFlights(tmp_list->first, 0);
 
-	free(tmp_list);
+	list_destroy(tmp_list);
 }
 
 /**
@@ -176,7 +168,7 @@ void FlightDeparturesInAirport(global_store* global) {
  */
 void FlightArrivalsInAirport(global_store* global) {
 	char id[ID_LENGTH];
-	node_t* p;
+	node_t* ptr;
 	list_t* tmp_list;
 	flight* tmp_flight;
 
@@ -188,8 +180,8 @@ void FlightArrivalsInAirport(global_store* global) {
 
 	tmp_list = list_create();
 
-	for (p = global->allFlights->first; p != NULL; p = p->next) {
-		tmp_flight = (flight*)p->data;
+	for (ptr = global->allFlights->first; ptr != NULL; ptr = ptr->next) {
+		tmp_flight = (flight*)ptr->data;
 		/* looks at the sorted flights to find the ones linked to the right */
 		/* arrival id */
 		if (strcmp(tmp_flight->arrival_id, id) == 0) {
@@ -201,7 +193,7 @@ void FlightArrivalsInAirport(global_store* global) {
 
 	PrintFlights(tmp_list->first, 1);
 
-	free(tmp_list);
+	list_destroy(tmp_list);
 }
 
 /**
@@ -224,7 +216,8 @@ void AdvanceSystemDate(global_store* global) {
 	free(global->date);
 	global->date = new_date;
 
-	printf(DATE_PRINT, global->date->day, global->date->month, global->date->year);
+	printf(DATE_PRINT,
+			global->date->day, global->date->month, global->date->year);
 }
 
 /**

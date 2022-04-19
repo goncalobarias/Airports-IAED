@@ -94,7 +94,7 @@ typedef struct {
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
 	clock* date_departure;
-	char* calendar_date;
+	char* flight_key;
 	int duration;
 	clock* date_arrival;
 	list_t* reservations;
@@ -176,7 +176,7 @@ char* GetFlightCode(void* flight_node);
 
 char* GetFlightCalendarDate(void* flight_node);
 
-char* GetCalendarDate(char* flight_code, clock* date);
+char* GetFlightKey(char* flight_code, clock* date);
 
 int CheckFlightCodeExistence(global_store* global, char* flight_code);
 

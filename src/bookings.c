@@ -36,6 +36,7 @@ booking* ReadBooking(global_store* global, char* flight_code, clock* date) {
  */
 void AddBooking(global_store* global, char* flight_code, clock* date) {
 	booking* new_booking = ReadBooking(global, flight_code, date);
+	flight* parent_flight = new_booking->parent_flight;
 	node_t* booking_node;
 
 	if (CheckAddBookingErrors(global, flight_code, new_booking)) {
@@ -43,9 +44,8 @@ void AddBooking(global_store* global, char* flight_code, clock* date) {
 		return;
 	}
 
-	new_booking->parent_flight->occupation += new_booking->res_num;
-	booking_node = list_insert(new_booking->parent_flight->reservations,
-								new_booking);
+	parent_flight->occupation += new_booking->res_num;
+	booking_node = list_insert(parent_flight->reservations, new_booking);
 	global->bookingsTable = hashtable_insert(global->bookingsTable,
 										  	booking_node,
 										  	GetBookingKey(booking_node),
@@ -78,14 +78,14 @@ void ListBookings(global_store* global, char* flight_code, clock* date) {
 int CheckAddBookingErrors(global_store* global, char* flight_code,
 						  booking* new_booking) {
 	flight* parent_flight = new_booking->parent_flight;
-	booking* booking_1 =
+	booking* booking_check =
 		GetBooking(global, new_booking->booking_code);
 
 	if (CheckBookingCodeErrors(new_booking->booking_code)) {
 		printf(BOOKING_ERR_INVALID);
 	} else if (parent_flight == NULL) {
 		printf(BOOKING_ERR_FLIGHT_CODE, flight_code);
-	} else if (booking_1 != NULL) {
+	} else if (booking_check != NULL) {
 		printf(BOOKING_ERR_DUPLICATE, new_booking->booking_code);
 	} else if (parent_flight->occupation + new_booking->res_num
 				> parent_flight->capacity) {
@@ -124,10 +124,11 @@ int CheckBookingCodeErrors(char* booking_code) {
 /**
  *
  */
-int CheckListBookingsErrors(global_store* global, char* flight_code, clock* date) {
-	flight* flight_1 = GetFlight(global, flight_code, date);
+int CheckListBookingsErrors(global_store* global, char* flight_code,
+							clock* date) {
+	flight* flight_list = GetFlight(global, flight_code, date);
 
-	if (flight_1 == NULL) {
+	if (flight_list == NULL) {
 		printf(BOOKING_ERR_FLIGHT_CODE, flight_code);
 	} else if (CheckDateErrors(global, date)) {
 		printf(DATE_ERR_INVALID);
@@ -143,9 +144,8 @@ int CheckListBookingsErrors(global_store* global, char* flight_code, clock* date
  */
 booking* GetBooking(global_store* global, char* booking_code) {
 	node_t* booking_node;
-	hash_elem* elem =
-		hashtable_get(global->bookingsTable, booking_code, booking_code,
-					GetBookingKey);
+	hash_elem* elem = hashtable_get(global->bookingsTable, booking_code,
+								 	booking_code, GetBookingKey);
 
 	if (elem == NULL) {
 		return NULL;
@@ -158,8 +158,9 @@ booking* GetBooking(global_store* global, char* booking_code) {
 /**
  *
  */
-char* GetBookingKey(void* booking_node) {
-	booking* booking_get = ((node_t*)booking_node)->data;
+char* GetBookingKey(void* node) {
+	node_t* booking_node = node;
+	booking* booking_get = booking_node->data;
 
 	return booking_get->booking_code;
 }
@@ -188,11 +189,11 @@ int CompareBookings(void* booking_1, void* booking_2) {
  *
  */
 void PrintBookings(node_t* booking_head) {
-	node_t* p;
+	node_t* ptr;
 	booking* tmp_booking;
 
-	for (p = booking_head; p != NULL; p = p->next) {
-		tmp_booking = (booking*)p->data;
+	for (ptr = booking_head; ptr != NULL; ptr = ptr->next) {
+		tmp_booking = (booking*)ptr->data;
 		printf(BOOKING_FULL_PRINT,
 		 		tmp_booking->booking_code, tmp_booking->res_num);
 	}
@@ -206,11 +207,13 @@ void RemoveBooking(global_store* global, char* booking_code) {
 							  booking_code, booking_code, GetBookingKey);
 	node_t* booking_node = booking_elem->data;
 	booking* booking_delete = booking_node->data;
+	flight* parent_flight = booking_delete->parent_flight;
 
-	booking_delete->parent_flight->occupation -= booking_delete->res_num;
+	parent_flight->occupation -= booking_delete->res_num;
 
-	hashtable_remove(global->bookingsTable, booking_code, booking_code, GetBookingKey);
-	list_remove(booking_delete->parent_flight->reservations, booking_node);
+	hashtable_remove(global->bookingsTable, booking_code, booking_code,
+				  	GetBookingKey);
+	list_remove(parent_flight->reservations, booking_node);
 	ClearBooking(booking_delete);
 }
 

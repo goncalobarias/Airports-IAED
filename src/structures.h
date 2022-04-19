@@ -83,6 +83,8 @@ node_t* list_insert(list_t* list, void* data);
 
 void list_remove(list_t* list, node_t* node_removal);
 
+void list_destroy(list_t* list);
+
 /* merge sort */
 
 void sort_list(list_t* list, int(*cmp)(void*, void*));
