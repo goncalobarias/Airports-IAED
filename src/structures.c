@@ -1,7 +1,7 @@
 /*
  *		File: structures.c
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
- *		Description: All of the data structures used for the 2nd project.
+ *		Description: All of the data structures used for the project.
  */
 
 #include <stdio.h>
@@ -47,15 +47,18 @@ unsigned int calc_hash_step(char* key) {
 }
 
 /**
- *
+ * Function used to calculate the two hashesh used for the double hashing
+ * implementation. It also calculates the phi, also known as the value the
+ * hashtable uses to scale it's main hash.
  */
 unsigned int* hashtable_calc_hashes(char* key, int size) {
 	unsigned int* hashing = SecureMalloc(sizeof(unsigned int) * 3);
 
-	hashing[0] = calc_hash(key);
-	hashing[1] = calc_hash_step(key);
-	hashing[2] = hashing[1] % size;
+	hashing[0] = calc_hash(key); /* first hash */
+	hashing[1] = calc_hash_step(key); /* second hash */
+	hashing[2] = hashing[1] % size; /* calculate the phi */
 
+	/* phi can never be 0, so if it reaches 0 it will always reset to 1 */
 	if (hashing[2] == 0) {
 		hashing[2] = 1;
 	}
@@ -83,7 +86,9 @@ hashtable* hashtable_create(int size) {
 }
 
 /**
- *
+ * Creates and allocates the necessary memory to an element of a hashtable
+ * and stores the data inside of it. The element has a state of taken or
+ * deleted. It's always created with the taken state.
  */
 hash_elem* hashtable_element_create(void* data) {
 	hash_elem* elem = SecureMalloc(sizeof(hash_elem));
@@ -95,7 +100,9 @@ hash_elem* hashtable_element_create(void* data) {
 }
 
 /**
- *
+ * Calculates the position to store the data with the given key. If the
+ * hashtable reaches its threshold then it will expand. Since it can expand
+ * it always returns a pointer to the table.
  */
 hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
 							char*(*get_key)(void*)) {
@@ -104,6 +111,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
 	int i = 1;
 	hash_elem* elem = hashtable_element_create(data);
 
+	/* find the spot to insert the data */
 	while (hash_t->table[h] != NULL) {
 		if (hash_t->table[h]->state == HASHTABLE_DELETED) {
 			free(hash_t->table[h]);
@@ -116,6 +124,7 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
 
 	free(hashing);
 
+	/* expand the table if needed */
 	if (++hash_t->elem_num >= hash_t->size * HASHTABLE_MAX_LOAD) {
 		hash_t = hashtable_expand(hash_t, get_key);
 	}
@@ -124,7 +133,9 @@ hashtable* hashtable_insert(hashtable* hash_t, void* data, char* key,
 }
 
 /**
- *
+ * Receives a key to search the positions in the hashtable and a value to
+ * compare to the data in those postions in order to find the right data,
+ * since the different data can have the same key.
  */
 hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val,
 						 char*(*get_cmp_val)(void*)) {
@@ -135,6 +146,7 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val,
 
 	free(hashing);
 
+	/* find the position of the data in the hashtable */
 	while (hash_t->table[h] != NULL) {
 		if (hash_t->table[h]->state != HASHTABLE_DELETED
 			&& strcmp(get_cmp_val(hash_t->table[h]->data), cmp_val) == 0) {
@@ -148,7 +160,9 @@ hash_elem* hashtable_get(hashtable* hash_t, char* key, char* cmp_val,
 }
 
 /**
- *
+ * Similar to the hashtable_get function, but instead of just getting the first
+ * match in the hashtable, it gets all of the values it matches and returns a
+ * list of the data it matches.
  */
 list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val,
 						  char*(*get_cmp_val)(void*)) {
@@ -160,6 +174,7 @@ list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val,
 
 	free(hashing);
 
+	/* find the positions of the data in the hashtable */
 	while (hash_t->table[h] != NULL) {
 		if (hash_t->table[h]->state != HASHTABLE_DELETED
 			&& strcmp(get_cmp_val(hash_t->table[h]->data), cmp_val) == 0) {
@@ -173,7 +188,8 @@ list_t* hashtable_get_all(hashtable* hash_t, char* key, char* cmp_val,
 }
 
 /**
- *
+ * Retrives the element to the delete from the hashtable and marks it as
+ * removes, by changing its state.
  */
 void hashtable_remove(hashtable* hash_t, char* key, char* cmp_val,
 					  char*(*get_cmp_val)(void*)) {
@@ -188,7 +204,7 @@ void hashtable_remove(hashtable* hash_t, char* key, char* cmp_val,
 }
 
 /**
- *
+ * The hashtable element is dead when it's empty or deleted.
  */
 int hash_elem_dead(hash_elem* elem) {
 	if (elem == NULL || elem->state == HASHTABLE_DELETED) {
@@ -199,7 +215,9 @@ int hash_elem_dead(hash_elem* elem) {
 }
 
 /**
- *
+ * Expands the hashtable when the threshold is reached. For this purpose it
+ * creates a new hashtable with close to double the size and reinserts all of
+ * the items into this new table. Returns a pointer to the new expanded table.
  */
 hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*)) {
 	int i;
@@ -219,7 +237,7 @@ hashtable* hashtable_expand(hashtable* hash_t, char*(*get_key)(void*)) {
 }
 
 /**
- *
+ * Clears all of the memory occupied by the hashtable and its elements.
  */
 void hashtable_destroy(hashtable* hash_t) {
 	int i;
@@ -236,7 +254,7 @@ void hashtable_destroy(hashtable* hash_t) {
 /*		Linked Lists		*/
 
 /**
- *
+ * Creates a new empty list and returns a pointer to it.
  */
 list_t* list_create() {
 	list_t* new_list = SecureMalloc(sizeof(list_t));
@@ -248,7 +266,8 @@ list_t* list_create() {
 }
 
 /**
- *
+ * Inserts an already allocated data into the given double linked list
+ * and rearranges the node connections.
  */
 node_t* list_insert(list_t* list, void* data) {
 	node_t* new_node = SecureMalloc(sizeof(node_t));
@@ -272,7 +291,8 @@ node_t* list_insert(list_t* list, void* data) {
 }
 
 /**
- *
+ * Removes a given node from the given double linked list and rearranges the
+ * node connections.
  */
 void list_remove(list_t* list, node_t* node_removal) {
 	if (node_removal != NULL) {
@@ -292,7 +312,8 @@ void list_remove(list_t* list, node_t* node_removal) {
 }
 
 /**
- *
+ * Frees the allocated memory to a list. Doesn't clear the nodes, since that is
+ * already done previously.
  */
 void list_destroy(list_t* list) {
 	free(list);
@@ -301,10 +322,12 @@ void list_destroy(list_t* list) {
 /*		Merge Sort Implementation		*/
 
 /**
- *
+ * Sorts a given double linked list using a mergesort implementation and the
+ * compare function it receives. Also marks the listed as sorted in order to
+ * not sort unnecessarily. After the sorting it finds the new tail node.
  */
 void sort_list(list_t* list, int(*cmp)(void*, void*)) {
-	node_t* p;
+	node_t* ptr;
 
 	if (list->first == NULL || list->sorted == LIST_SORTED) {
 		return;
@@ -314,14 +337,15 @@ void sort_list(list_t* list, int(*cmp)(void*, void*)) {
 
 	list->first = list_mergesort(list->first, cmp);
 
-	for (p = list->last; p->next != NULL; p = p->next) {
+	for (ptr = list->last; ptr->next != NULL; ptr = ptr->next) {
 	}
 
-	list->last = p;
+	list->last = ptr;
 }
 
 /**
- *
+ * This function merges two sorted double linked lists by rearranging its node
+ * connections.
  */
 node_t* merge(node_t* first, node_t* second, int(*cmp)(void*, void*)) {
     if (first == NULL) {
@@ -349,7 +373,7 @@ node_t* merge(node_t* first, node_t* second, int(*cmp)(void*, void*)) {
 }
 
 /**
- *
+ * Main function to mergesort a double linked list.
  */
 node_t* list_mergesort(node_t* head, int(*cmp)(void*, void*)) {
 	node_t *second;
@@ -368,11 +392,13 @@ node_t* list_mergesort(node_t* head, int(*cmp)(void*, void*)) {
 }
 
 /**
- *
+ * Splits a double linked list into two double linked lists, each one with half
+ * the size of the original one.
  */
 node_t* split(node_t* head) {
     node_t *fast = head, *slow = head, *tmp;
 
+	/* reaches the middle position of the list */
     while (fast->next && fast->next->next) {
         fast = fast->next->next;
         slow = slow->next;

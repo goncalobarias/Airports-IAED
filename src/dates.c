@@ -16,7 +16,7 @@ const int days_months_ac[MONTHS] = 			/* stores the accumulated days per month i
  * If it's invalid it returns 1, otherwise it returns 0.
  * Auxiliary function of the 't' command.
  */
-int CheckDateErrors(global_store* global, clock* date_depart) {
+int CheckDateErrors(global_store* global, clock* date) {
 	clock* max_date = SecureMalloc(sizeof(clock));
 
 	max_date->year = global->date->year + 1;
@@ -25,14 +25,14 @@ int CheckDateErrors(global_store* global, clock* date_depart) {
 	max_date->hours = global->date->hours;
 	max_date->minutes = global->date->minutes;
 
-	if (CompareDates(global->date, date_depart, 1) > 0
-		|| CompareDates(max_date, date_depart, 0) < 0) {
+	if (CompareDates(global->date, date, CMP_DATES_MIN) > 0
+		|| CompareDates(max_date, date, CMP_DATES_DAY) < 0) {
 		free(max_date);
-		return 1;
+		return TRUE;
 	}
 
 	free(max_date);
-	return 0;
+	return FALSE;
 }
 
 /**
@@ -66,8 +66,8 @@ int ConvertDatesToMins(clock* formatted_date) {
  * converts the new date in minutes into a proper formatted date.
  */
 clock* UpdateDate(clock* date, int duration) {
-	int date_departure_mins = ConvertDatesToMins(date);
-	int updated_date_mins = date_departure_mins + duration, i = 1;
+	int date_depart_mins = ConvertDatesToMins(date);
+	int updated_date_mins = date_depart_mins + duration, i = 1;
 	clock* new_date = SecureMalloc(sizeof(clock));
 
 	/* updates the year */
@@ -94,16 +94,16 @@ clock* UpdateDate(clock* date, int duration) {
 
 /**
  * Transforms two dates into minutes and compares them.
- * If the mode is set to 0, it will compare the dates by day of year instead of
- * minutes. Returns 1 if the second date is bigger then the first on, 0 if
- * both are equal dates or -1 if the first date is bigger then the second.
+ * If the mode is set to CMP_DATES_DAY, it will compare the dates by day of year
+ * instead of minutes. Returns 1 if the second date is bigger then the first
+ * one, 0 if both are equal dates or -1 if the first date is bigger then the second.
  */
 int CompareDates(clock* date_1, clock* date_2, const int mode) {
 	int date_1_mins = ConvertDatesToMins(date_1);
 	int date_2_mins = ConvertDatesToMins(date_2);
 
 	/* if the mode is 0, two dates will be equal if they are on the same day */
-	if (mode == 0 && date_1->month == date_2->month
+	if (mode == CMP_DATES_DAY && date_1->month == date_2->month
 		&& date_1->day == date_2->day && date_1->year == date_2->year) {
 		return 0;
 	}
@@ -122,8 +122,8 @@ int CompareFlightDatesDeparture(void* flight_1, void* flight_2) {
 	flight* flight_cmp_1 = flight_1;
 	flight* flight_cmp_2 = flight_2;
 
-	return CompareDates(flight_cmp_1->date_departure,
-					 	flight_cmp_2->date_departure, 1);
+	return CompareDates(flight_cmp_1->date_depart,
+					 	flight_cmp_2->date_depart, CMP_DATES_MIN);
 }
 
 /**
@@ -134,11 +134,12 @@ int CompareFlightDatesArrival(void* flight_1, void* flight_2) {
 	flight* flight_cmp_2 = flight_2;
 
 	return CompareDates(flight_cmp_1->date_arrival,
-					 	flight_cmp_2->date_arrival, 1);
+					 	flight_cmp_2->date_arrival, CMP_DATES_MIN);
 }
 
 /**
- * Reads the clock and retrives a formatted date.
+ * Reads the clock and retrives a formatted date, allocating the necessary
+ * memory to store it.
  */
 clock* ReadClock(char calendar_date[], char hours_mins[]) {
 	clock* date = SecureMalloc(sizeof(clock));

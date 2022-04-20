@@ -22,7 +22,7 @@ int main() {
 		HandleCommands(global, command);
 	}
 
-	/* clear all of the memory and terminate program */
+	/* clears all of the memory and terminates the program */
 	ExitProgram(global);
 
 	return 0;
@@ -31,29 +31,27 @@ int main() {
 /**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
- * Returns 1 if the program should continue, otherwise it returns 0 in
- * order to exit the program.
  */
-int HandleCommands(global_store* global, char command) {
+void HandleCommands(global_store* global, char command) {
 	switch(command) {
 		case 'a': AddAirport(global);
-			return 1;
+			return;
 		case 'l': ListAirports(global);
-			return 1;
+			return;
 		case 'v': AddFlight_ListFlights(global);
-			return 1;
+			return;
 		case 'p': FlightDeparturesInAirport(global);
-			return 1;
+			return;
 		case 'c': FlightArrivalsInAirport(global);
-			return 1;
+			return;
 		case 't': AdvanceSystemDate(global);
-			return 1;
+			return;
 		case 'r': AddBooking_ListBookings(global);
-			return 1;
+			return;
 		case 'e': DeleteBooking_Flight(global);
-			return 1;
+			return;
 		default: /* ignore all unknown commands */
-			return 1;
+			return;
 	}
 }
 
@@ -96,7 +94,7 @@ void ListAirports(global_store* global) {
 
 	do {
 		/* when the state is 1 it means it just read the last argument */
-		state = GetOneArgument(id, 0);
+		state = GetOneArgument(id, UNTIL_WHITESPACE);
 
 		if (CheckAirportExistence(global, id)) {
 			printf(AIRPORT_ERR_NO_ID, id);
@@ -137,7 +135,7 @@ void FlightDeparturesInAirport(global_store* global) {
 	list_t* tmp_list;
 	flight* tmp_flight;
 
-	GetOneArgument(id, 0);
+	GetOneArgument(id, UNTIL_WHITESPACE);
 	if (CheckAirportExistence(global, id)) {
 		printf(AIRPORT_ERR_NO_ID, id);
 		return;
@@ -156,7 +154,7 @@ void FlightDeparturesInAirport(global_store* global) {
 
 	sort_list(tmp_list, CompareFlightDatesDeparture);
 
-	PrintFlights(tmp_list->first, 0);
+	PrintFlights(tmp_list->first, DEPARTURE_INFO);
 
 	list_destroy(tmp_list);
 }
@@ -172,7 +170,7 @@ void FlightArrivalsInAirport(global_store* global) {
 	list_t* tmp_list;
 	flight* tmp_flight;
 
-	GetOneArgument(id, 0);
+	GetOneArgument(id, UNTIL_WHITESPACE);
 	if (CheckAirportExistence(global, id)) {
 		printf(AIRPORT_ERR_NO_ID, id);
 		return;
@@ -191,20 +189,20 @@ void FlightArrivalsInAirport(global_store* global) {
 
 	sort_list(tmp_list, CompareFlightDatesArrival);
 
-	PrintFlights(tmp_list->first, 1);
+	PrintFlights(tmp_list->first, ARRIVAL_INFO);
 
 	list_destroy(tmp_list);
 }
 
 /**
  * Handles the 't' command.
- * Forwards the date of the system and sets the max date of the system.
+ * Forwards the date of the system.
  */
 void AdvanceSystemDate(global_store* global) {
 	char date[DATE_LENGTH];
 	clock* new_date;
 
-	GetOneArgument(date, 0);
+	GetOneArgument(date, UNTIL_WHITESPACE);
 	new_date = ReadClock(date, START_DAY);
 
 	if (CheckDateErrors(global, new_date)) {
@@ -221,7 +219,7 @@ void AdvanceSystemDate(global_store* global) {
 }
 
 /**
- *
+ * Initializes all of the global variables used throughout the project.
  */
 global_store* GlobalInit() {
 	global_store* global = SecureMalloc(sizeof(global_store));
@@ -245,8 +243,8 @@ global_store* GlobalInit() {
  * Fetches one argument (characters separated by spaces) from the standard
  * input and populates the given string with it.
  * Ignores any trailing white spaces and always stops at a newline or end of file.
- * If the mode is set to 1 it will fetch for an argument that contains whitespaces
- * and only end on a newline or end of file.
+ * If the mode is set to UNTIL_EOL it will fetch for an argument that contains
+ * whitespaces and only end on a newline or end of file.
  */
 char GetOneArgument(char *argument, const int mode) {
 	int i = 0;
@@ -260,7 +258,7 @@ char GetOneArgument(char *argument, const int mode) {
 	/* finishes argument when a non trailing white space is read if the */
 	/* mode is 0 */
 	while (c != '\n' && c != EOF) {
-		if (mode == 0 && (c == ' ' || c == '\t')) {
+		if (mode == UNTIL_WHITESPACE && (c == ' ' || c == '\t')) {
 			break;
 		}
 		argument[i++] = c;

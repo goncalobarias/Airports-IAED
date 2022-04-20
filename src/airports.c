@@ -11,11 +11,12 @@
 /**
  * Uses the GetOneArgument function to read all of the arguments from stdin that
  * create an airport.
+ * Auxiliary function to the 'a' command.
  */
 void ReadAirport(airport *new_airport) {
-	GetOneArgument(new_airport->id, 0);
-	GetOneArgument(new_airport->country, 0);
-	GetOneArgument(new_airport->city, 1);
+	GetOneArgument(new_airport->id, UNTIL_WHITESPACE);
+	GetOneArgument(new_airport->country, UNTIL_WHITESPACE);
+	GetOneArgument(new_airport->city, UNTIL_EOL);
 	new_airport->departures = 0;
 }
 
@@ -30,7 +31,7 @@ int CheckAddAirportErrors(global_store* global, const char id[]) {
 	for (i = 0; i < id_len; i++) {
 		if (!IsUpperCase(id[i])) {
 			printf(AIRPORT_ERR_INVALID); /* id contains unwanted characters */
-			return 1;
+			return TRUE;
 		}
 	}
 	if (global->totalAirports >= MAX_AIRPORTS) {
@@ -38,10 +39,10 @@ int CheckAddAirportErrors(global_store* global, const char id[]) {
 	} else if (!CheckAirportExistence(global, id)) {
 		printf(AIRPORT_ERR_DUPLICATE); /* duplicated airport */
 	} else {
-		return 0;
+		return FALSE;
 	}
 
-	return 1;
+	return TRUE;
 }
 
 /**
@@ -56,10 +57,10 @@ int CheckAirportExistence(global_store* global, const char id[]) {
 	/* system it returns 1. */
 	if (i == global->totalAirports
 		|| strcmp(global->allAirports[global->sortedAirports[i]].id, id) != 0) {
-		return 1;
+		return TRUE;
 	}
 
-	return 0;
+	return FALSE;
 }
 
 /**
@@ -91,10 +92,10 @@ int GetAirport(global_store* global, const char id[]) {
  * Adds a new airport to an array sorted by airport ids. It uses the
  * GetAirport function in order to find the place to insert the new airport.
  */
-void AddSortedAirport(global_store* global, airport airport_1) {
+void AddSortedAirport(global_store* global, airport airport_add) {
 	int index, i;
 
-	index = GetAirport(global, airport_1.id);
+	index = GetAirport(global, airport_add.id);
 
 	/* inserts the airport in the sorted array */
 	for (i = global->totalAirports - 1; i >= index; i--) {
@@ -119,7 +120,7 @@ void ListAllAirports(global_store* global) {
  * departures.
  * Auxiliary function of the 'l' command.
  */
-void PrintAirport(airport airport_1) {
-	printf(AIRPORT_PRINT, airport_1.id, airport_1.city, airport_1.country,
- 						airport_1.departures);
+void PrintAirport(airport airport_print) {
+	printf(AIRPORT_PRINT, airport_print.id, airport_print.city,
+						airport_print.country, airport_print.departures);
 }

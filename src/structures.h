@@ -15,10 +15,10 @@
 #define MEMORY_ERR_CODE -1
 #define HASHTABLE_MAX_LOAD 0.5
 #define HASHTABLE_START_SIZE 20047
-#define HASHTABLE_DELETED -2
-#define HASHTABLE_TAKEN -3
-#define LIST_SORTED -4
-#define LIST_UNSORTED -5
+#define HASHTABLE_DELETED -8
+#define HASHTABLE_TAKEN -9
+#define LIST_SORTED -10
+#define LIST_UNSORTED -11
 
 /**
  * Data structures

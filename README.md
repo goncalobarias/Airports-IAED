@@ -1,15 +1,15 @@
-__Aeroportos (Projecto 2 IAED)__
+__Airport Manager (Project 2 IAED)__
 ___
-- NOTA: /20.0
-- Automática (Mooshak): /16.0
-- Qualidade do Código: /4.0
-___
-### Usar
+### Use
 1. Clone the repo
 ```
-git clone -b project-2 https://github.com/Gocho1234/Aeroportos-IAED.git
+git clone -b project-2 https://github.com/Gocho1234/Airports-IAED.git
 ```
 2. Compile and run the code
 ```
-make -C Aeroportos-IAED/src
+make -C Airports-IAED/src
 ```
+___
+- GRADE: /20.0
+- Automatic (Mooshak): 16.0/16.0
+- Quality of the Code: /4.0
