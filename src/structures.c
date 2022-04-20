@@ -283,6 +283,7 @@ node_t* list_insert(list_t* list, void* data) {
 	}
 
 	list->last = new_node;
+
 	if (list->sorted != LIST_UNSORTED) {
 		list->sorted = LIST_UNSORTED;
 	}

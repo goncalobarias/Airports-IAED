@@ -67,7 +67,7 @@
 
 #define DATE_ERR_INVALID "invalid date\n"
 
-/* booking */
+/* bookings */
 #define MAX_ARG_LENGTH 65535
 #define MIN_BOOKING_CODE_LENGTH 10
 
@@ -104,9 +104,9 @@ typedef struct {
 	char departure_id[ID_LENGTH];
 	char arrival_id[ID_LENGTH];
 	clock* date_depart;
-	char* flight_key;
 	int duration;
 	clock* date_arrival;
+	char* flight_key;
 	list_t* bookings;
 	long int occupation;
 	long int capacity;

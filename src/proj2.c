@@ -52,7 +52,7 @@ void DeleteBooking_Flight(global_store* global) {
 		}
 		RemoveBooking(global, code);
 	} else {
-		if (!CheckFlightCodeExistence(global, code)) {
+		if (CheckFlightCodeExistence(global, code) == 0) {
 			printf(BOOKING_FLIGHT_NA);
 			return;
 		}
@@ -98,7 +98,7 @@ void* SecureMalloc(unsigned int allocation) {
 }
 
 /**
- * Checks if the numbre x is a prime number.
+ * Checks if the number x is prime.
  */
 int IsPrime(int x) {
 	int i;
