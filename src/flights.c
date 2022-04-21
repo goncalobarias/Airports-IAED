@@ -215,7 +215,7 @@ int CheckFlightCodeExistence(global_store* global, char* flight_code) {
 	hash_elem* elem = hashtable_get(global->flightsTable, flight_code,
 								 	flight_code, GetFlightCode);
 
-	return (elem == NULL ? 0 : 1);
+	return (elem == NULL ? FALSE : TRUE);
 }
 
 /**
