@@ -4,9 +4,9 @@ The goal was, in the first part, to construct an airports management system, as 
 
 In the second part of the project, the goal was to modify the first part in order to be able to also define bookings for the flights and a way to consult and modify them.
 
-[Project 1 Statement](docs/statement-p1.pdf)
-[Project 2 Statement](docs/statement-p2.pdf)
-[Workshop Test Statement](docs/statement-workshop-test.md)
+[Project 1 Statement](docs/statement-p1.pdf) |
+[Project 2 Statement](docs/statement-p2.pdf) |
+[Workshop Test Statement](docs/statement-workshop-test.md) |
 [Specified Guidelines](docs/guidelines.pdf)
 ___
 ### Use
