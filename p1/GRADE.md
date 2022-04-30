@@ -1,0 +1,3 @@
+- GRADE: 19.5/20.0
+- Automatic (Mooshak): 16.0/16.0
+- Quality of the Code: 3.5/4.0
