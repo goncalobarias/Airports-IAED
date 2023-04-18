@@ -1,0 +1,13 @@
+a LISb0   Portugal        Lisbon Lisboa
+a LISb   Portugal        Lisbon Lisboa
+a 0port  Portugal        Porto
+a Porto  Portugal        Porto
+a Faro1   Portugal        Faro
+a Faro   Portugal        Faro
+v TP12 LISb 0port 23-03-2022 10:10 00:50 78
+v TP12 LISb Porto 24-03-2022 10:10 00:50 78
+v TP321 Faro LISb 25-03-2022 11:11 01:00 50
+v TP321 Faro LISb 26-03-2022 11:11 01:00 50
+v TP321 Faro1 LISb 27-03-2022 11:11 01:00 50
+v
+q

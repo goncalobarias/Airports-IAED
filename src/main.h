@@ -25,7 +25,8 @@
 #define CMP_DATES_MIN -7
 
 /* airports */
-#define ID_LENGTH 4
+#define MAX_ID_LENGTH 5
+#define MIN_ID_LENGTH 3
 #define MAX_COUNTRY_LENGTH 31
 #define MAX_CITY_LENGTH 51
 #define MAX_AIRPORTS 40
@@ -46,6 +47,7 @@
 #define FLIGHT_PRINT "%s %s"
 #define FLIGHT_FULL_PRINT "%s %s %s"
 
+#define FLIGHT_ERR_NA "not found\n"
 #define FLIGHT_ERR_INVALID "invalid flight code\n"
 #define FLIGHT_ERR_DUPLICATE "flight already exists\n"
 #define FLIGHT_ERR_TOO_MANY "too many flights\n"
@@ -85,52 +87,47 @@
  */
 
 typedef struct {
-    int day;
-    int month;
-    int year;
-    int hours;
-    int minutes;
+	int day;
+	int month;
+	int year;
+	int hours;
+	int minutes;
 } clock;
 
 typedef struct {
-    char id[ID_LENGTH];
-    char country[MAX_COUNTRY_LENGTH];
-    char city[MAX_CITY_LENGTH];
-    int departures;
+	char id[MAX_ARG_LENGTH];
+	char country[MAX_COUNTRY_LENGTH];
+	char city[MAX_CITY_LENGTH];
+	int departures;
 } airport;
 
 typedef struct {
-    char *flight_code;
-    char departure_id[ID_LENGTH];
-    char arrival_id[ID_LENGTH];
-    clock *date_depart;
-    int duration;
-    clock *date_arrival;
-    char *flight_key;
-    list_t *bookings;
-    long int occupation;
-    long int capacity;
+	char* flight_code;
+	char departure_id[MAX_ARG_LENGTH];
+	char arrival_id[MAX_ARG_LENGTH];
+	clock* date_depart;
+	int duration;
+	clock* date_arrival;
+	char* flight_key;
+	list_t* bookings;
+	long int occupation;
+	long int capacity;
 } flight;
 
 typedef struct {
-    flight *parent_flight;
-    char *booking_code;
-    int pas_num;
+	flight* parent_flight;
+	char* booking_code;
+	int pas_num;
 } booking;
 
 typedef struct {
-    int totalAirports; /* tracks the total amount of airports added by the user
-                        */
-    airport allAirports[MAX_AIRPORTS]; /* stores all of the current airports */
-    int sortedAirports[MAX_AIRPORTS]; /* stores the indexes of all the airports,
-                                         sorted by the alphabetical order of the
-                                         IDs */
-    list_t *allFlights;       /* double linked list to store all of the lists */
-    hashtable *flightsTable;  /* hashtable to store all of the flights by their
-                                 flight code */
-    hashtable *bookingsTable; /* hashtable to store all of the bookings by their
-                                 booking code */
-    clock *date;              /* stores the system date of the system */
+	int totalAirports; 					/* tracks the total amount of airports added by the user */
+	airport allAirports[MAX_AIRPORTS]; 	/* stores all of the current airports */
+	int sortedAirports[MAX_AIRPORTS]; 	/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
+	list_t* allFlights;					/* double linked list to store all of the lists */
+	hashtable* flightsTable;			/* hashtable to store all of the flights by their flight code */
+	hashtable* bookingsTable;			/* hashtable to store all of the bookings by their booking code */
+	clock* date;						/* stores the system date of the system */
 } global_store;
 
 /**
@@ -139,21 +136,21 @@ typedef struct {
 
 /* proj1.c */
 
-void HandleCommands(global_store *global, char command);
+void HandleCommands(global_store* global, char command);
 
-void AddAirport(global_store *global);
+void AddAirport(global_store* global);
 
-void ListAirports(global_store *global);
+void ListAirports(global_store* global);
 
-void AddFlight_ListFlights(global_store *global);
+void AddFlight_ListFlights(global_store* global);
 
-void FlightDeparturesInAirport(global_store *global);
+void FlightDeparturesInAirport(global_store* global);
 
-void FlightArrivalsInAirport(global_store *global);
+void FlightArrivalsInAirport(global_store* global);
 
-void AdvanceSystemDate(global_store *global);
+void AdvanceSystemDate(global_store* global);
 
-global_store *GlobalInit();
+global_store* GlobalInit();
 
 char GetOneArgument(char *argument, const int mode);
 
@@ -161,77 +158,77 @@ char GetOneArgument(char *argument, const int mode);
 
 void ReadAirport(airport *new_airport);
 
-int CheckAddAirportErrors(global_store *global, const char id[]);
+int CheckAddAirportErrors(global_store* global, const char id[]);
 
-int CheckAirportExistence(global_store *global, const char id[]);
+int CheckAirportExistence(global_store* global, const char id[]);
 
-int GetAirport(global_store *global, const char id[]);
+int GetAirport(global_store* global, const char id[]);
 
-void AddSortedAirport(global_store *global, airport airport_add);
+void AddSortedAirport(global_store* global, airport airport_add);
 
-void ListAllAirports(global_store *global);
+void ListAllAirports();
 
 void PrintAirport(airport airport_print);
 
 /* flights.c */
 
-flight *ReadFlight();
+flight* ReadFlight();
 
-void AddFlight(global_store *global);
+void AddFlight(global_store* global);
 
-void ListAllFlights(global_store *global);
+void ListAllFlights(global_store* global);
 
-int CheckAddFlightErrors(global_store *global, flight *new_flight);
+int CheckAddFlightErrors(global_store* global, flight* new_flight);
 
-int CheckFlightCodeErrors(char *flight_code);
+int CheckFlightCodeErrors(char* flight_code);
 
-flight *GetFlight(global_store *global, char *flight_code, clock *date_depart);
+flight* GetFlight(global_store* global, char* flight_code, clock* date_depart);
 
-char *GetFlightCode(void *flight_node);
+char* GetFlightCode(void* flight_node);
 
-char *GetFlightKey(void *flight_node);
+char* GetFlightKey(void* flight_node);
 
-char *CreateFlightKey(char *flight_code, clock *date_depart);
+char* CreateFlightKey(char* flight_code, clock* date_depart);
 
-int CheckFlightCodeExistence(global_store *global, char *flight_code);
+int CheckFlightCodeExistence(global_store* global, char* flight_code);
 
-void ClearFlight(void *tmp_flight);
+void ClearFlight(void* tmp_flight);
 
-void PrintFlights(node_t *flight_head, const int mode);
+void PrintFlights(node_t* flight_head, const int mode);
 
-void RemoveFlights(global_store *global, char *flight_code);
+void RemoveFlights(global_store* global, char* flight_code);
 
-void RemoveFlight(global_store *global, node_t *flight_node);
+void RemoveFlight(global_store* global, node_t* flight_node);
 
 /* dates.c */
 
-int CheckDateErrors(global_store *global, clock *date);
+int CheckDateErrors(global_store* global, clock* date);
 
-int ConvertDatesToMins(clock *formatted_date);
+int ConvertDatesToMins(clock* formatted_date);
 
-clock *UpdateDate(clock *date, int duration);
+clock* UpdateDate(clock* date, int duration);
 
-int CompareDates(clock *date_1, clock *date_2, const int mode);
+int CompareDates(clock* date_1, clock* date_2, const int mode);
 
-int CompareFlightDatesDeparture(void *flight_1, void *flight_2);
+int CompareFlightDatesDeparture(void* flight_1, void* flight_2);
 
-int CompareFlightDatesArrival(void *flight_1, void *flight_2);
+int CompareFlightDatesArrival(void* flight_1, void* flight_2);
 
-clock *ReadClock(char calendar_date[], char hours_mins[]);
+clock* ReadClock(char calendar_date[], char hours_mins[]);
 
 int ReadDuration(char duration[]);
 
-void PrintClock(clock *date);
+void PrintClock(clock* date);
 
 /* proj2.c */
 
-void AddBooking_ListBookings(global_store *global);
+void AddBooking_ListBookings(global_store* global);
 
-void DeleteBooking_Flight(global_store *global);
+void DeleteBooking_Flight(global_store* global);
 
-void ExitProgram(global_store *global);
+void ExitProgram(global_store* global);
 
-void *SecureMalloc(unsigned int allocation);
+void* SecureMalloc(unsigned int allocation);
 
 int IsPrime(int x);
 
@@ -239,37 +236,36 @@ int GetPrime(int minNum);
 
 int IsUpperCase(char c);
 
+int IsLowerCase(char c);
+
 int IsDigit(char c);
 
 /* bookings.c */
 
-booking *ReadBooking(global_store *global, char *flight_code,
-                     clock *date_depart);
+booking* ReadBooking(global_store* global, char* flight_code, clock* date_depart);
 
-void AddBooking(global_store *global, char *flight_code, clock *date_depart);
+void AddBooking(global_store* global, char* flight_code, clock* date_depart);
 
-void ListBookings(global_store *global, char *flight_code, clock *date_depart);
+void ListBookings(global_store* global, char* flight_code, clock* date_depart);
 
-int CheckAddBookingErrors(global_store *global, char *flight_code,
-                          booking *new_booking);
+int CheckAddBookingErrors(global_store* global, char* flight_code, booking* new_booking);
 
-int CheckBookingCodeErrors(char *booking_code);
+int CheckBookingCodeErrors(char* booking_code);
 
-int CheckListBookingsErrors(global_store *global, char *flight_code,
-                            clock *date_depart);
+int CheckListBookingsErrors(global_store* global, char* flight_code, clock* date_depart);
 
-booking *GetBooking(global_store *global, char *booking_code);
+booking* GetBooking(global_store* global, char* booking_code);
 
-char *GetBookingKey(void *booking_node);
+char* GetBookingKey(void* booking_node);
 
-void ClearBooking(void *tmp_booking);
+void ClearBooking(void* tmp_booking);
 
-int CompareBookings(void *booking_1, void *booking_2);
+int CompareBookings(void* booking_1, void* booking_2);
 
-void PrintBookings(node_t *booking_head);
+void PrintBookings(node_t* booking_head);
 
-void RemoveBookings(global_store *global, list_t *bookings);
+void RemoveBookings(global_store* global, list_t* bookings);
 
-void RemoveBooking(global_store *global, char *booking_code);
+void RemoveBooking(global_store* global, char* booking_code);
 
-#endif /* _MAIN_H_ */
+#endif

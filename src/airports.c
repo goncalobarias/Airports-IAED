@@ -4,9 +4,9 @@
  *		Description: All functions used to create and modify airports.
  */
 
-#include "main.h"
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
 
 /**
  * Uses the GetOneArgument function to read all of the arguments from stdin that
@@ -14,10 +14,10 @@
  * Auxiliary function to the 'a' command.
  */
 void ReadAirport(airport *new_airport) {
-    GetOneArgument(new_airport->id, UNTIL_WHITESPACE);
-    GetOneArgument(new_airport->country, UNTIL_WHITESPACE);
-    GetOneArgument(new_airport->city, UNTIL_EOL);
-    new_airport->departures = 0;
+	GetOneArgument(new_airport->id, UNTIL_WHITESPACE);
+	GetOneArgument(new_airport->country, UNTIL_WHITESPACE);
+	GetOneArgument(new_airport->city, UNTIL_EOL);
+	new_airport->departures = 0;
 }
 
 /**
@@ -25,24 +25,29 @@ void ReadAirport(airport *new_airport) {
  * If so, it returns 0, otherwise it returns 1.
  * Auxiliary function of the 'a' command.
  */
-int CheckAddAirportErrors(global_store *global, const char id[]) {
-    int i, id_len = strlen(id);
+int CheckAddAirportErrors(global_store* global, const char id[]) {
+	int i, id_len = strlen(id);
 
-    for (i = 0; i < id_len; i++) {
-        if (!IsUpperCase(id[i])) {
-            printf(AIRPORT_ERR_INVALID); /* id contains unwanted characters */
-            return TRUE;
-        }
-    }
-    if (global->totalAirports >= MAX_AIRPORTS) {
-        printf(AIRPORT_ERR_TOO_MANY); /* no more space to add new airports*/
-    } else if (!CheckAirportExistence(global, id)) {
-        printf(AIRPORT_ERR_DUPLICATE); /* duplicated airport */
-    } else {
-        return FALSE;
-    }
+	if (id_len < MIN_ID_LENGTH || id_len > MAX_ID_LENGTH) {
+		printf(AIRPORT_ERR_INVALID); /* id doesn't have correct length */
+		return TRUE;
+	}
 
-    return TRUE;
+	for (i = 0; i < id_len; i++) {
+		if (!IsUpperCase(id[i]) && !IsLowerCase(id[i])) {
+			printf(AIRPORT_ERR_INVALID); /* id contains unwanted characters */
+			return TRUE;
+		}
+	}
+	if (global->totalAirports >= MAX_AIRPORTS) {
+		printf(AIRPORT_ERR_TOO_MANY); /* no more space to add new airports*/
+	} else if (!CheckAirportExistence(global, id)) {
+		printf(AIRPORT_ERR_DUPLICATE); /* duplicated airport */
+	} else {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 /**
@@ -50,70 +55,69 @@ int CheckAddAirportErrors(global_store *global, const char id[]) {
  * to the system.
  * If so, it returns 0, otherwise it returns 1.
  */
-int CheckAirportExistence(global_store *global, const char id[]) {
-    int i = GetAirport(global, id);
+int CheckAirportExistence(global_store* global, const char id[]) {
+	int i = GetAirport(global, id);
 
-    /* if the index of the airport is out of bounds or the airport is not in the
-     */
-    /* system it returns 1. */
-    if (i == global->totalAirports ||
-        strcmp(global->allAirports[global->sortedAirports[i]].id, id) != 0) {
-        return TRUE;
-    }
+	/* if the index of the airport is out of bounds or the airport is not in the */
+	/* system it returns 1. */
+	if (i == global->totalAirports
+		|| strcmp(global->allAirports[global->sortedAirports[i]].id, id) != 0) {
+		return TRUE;
+	}
 
-    return FALSE;
+	return FALSE;
 }
 
 /**
  * Uses binary search to get the index of an airport from the id it receives.
- * It uses the sortedAirports array to do the searching. If the airport is
- * found, it returns it's position on the sorted array, otherwise it returns the
+ * It uses the sortedAirports array to do the searching. If the airport is found,
+ * it returns it's position on the sorted array, otherwise it returns the
  * position where the airport should be inserted.
  */
-int GetAirport(global_store *global, const char id[]) {
-    int left = 0, right = global->totalAirports - 1, middle, comp;
+int GetAirport(global_store* global, const char id[]) {
+	int left = 0, right = global->totalAirports - 1, middle, comp;
 
-    while (left <= right) {
-        middle = (left + right) / 2;
-        comp =
-            strcmp(global->allAirports[global->sortedAirports[middle]].id, id);
-        if (comp == 0) {
-            return middle; /* it finds the airport */
-        } else if (comp < 0) {
-            left = middle + 1;
-        } else {
-            right = middle - 1;
-        }
-    }
+	while (left <= right) {
+		middle = (left + right) / 2;
+		comp =
+			strcmp(global->allAirports[global->sortedAirports[middle]].id, id);
+		if (comp == 0) {
+			return middle; /* it finds the airport */
+		} else if (comp < 0) {
+			left = middle + 1;
+		} else {
+			right = middle - 1;
+		}
+	}
 
-    return left;
+	return left;
 }
 
 /**
  * Adds a new airport to an array sorted by airport ids. It uses the
  * GetAirport function in order to find the place to insert the new airport.
  */
-void AddSortedAirport(global_store *global, airport airport_add) {
-    int index, i;
+void AddSortedAirport(global_store* global, airport airport_add) {
+	int index, i;
 
-    index = GetAirport(global, airport_add.id);
+	index = GetAirport(global, airport_add.id);
 
-    /* inserts the airport in the sorted array */
-    for (i = global->totalAirports - 1; i >= index; i--) {
-        global->sortedAirports[i + 1] = global->sortedAirports[i];
-    }
-    global->sortedAirports[index] = global->totalAirports;
+	/* inserts the airport in the sorted array */
+	for (i = global->totalAirports - 1; i >= index; i--) {
+		global->sortedAirports[i + 1] = global->sortedAirports[i];
+	}
+	global->sortedAirports[index] = global->totalAirports;
 }
 
 /**
  * Lists all of the airports sorted by their id in alphabetical order.
  */
-void ListAllAirports(global_store *global) {
-    int i;
+void ListAllAirports(global_store* global) {
+	int i;
 
-    for (i = 0; i < global->totalAirports; i++) {
-        PrintAirport(global->allAirports[global->sortedAirports[i]]);
-    }
+	for (i = 0; i < global->totalAirports; i++) {
+		PrintAirport(global->allAirports[global->sortedAirports[i]]);
+	}
 }
 
 /**
@@ -122,6 +126,6 @@ void ListAllAirports(global_store *global) {
  * Auxiliary function of the 'l' command.
  */
 void PrintAirport(airport airport_print) {
-    printf(AIRPORT_PRINT, airport_print.id, airport_print.city,
-           airport_print.country, airport_print.departures);
+	printf(AIRPORT_PRINT, airport_print.id, airport_print.city,
+						airport_print.country, airport_print.departures);
 }
