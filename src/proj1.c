@@ -2,89 +2,99 @@
  *		File: proj1.c
  * 		Author: Gonçalo Sampaio Bárias (ist1103124)
  *		Email: goncalo.barias@tecnico.ulisboa.pt
- *		Course: Computer Science and Engineering (Alameda) - Instituto
- *				Superior Técnico
- * 		Description: Main project file for the 1st IAED Project - 21/22
- *					(Airport Manager).
+ *		Course: Computer Science and Engineering (Alameda) - Instituto Superior Técnico
+ *		Description: Main project file for the 1st IAED Project - 21/22 (Airport Manager).
  */
 
-#include "main.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
+#include "proj1.h"
+
+/* Global variables */
+int totalAirports; 									/* tracks the total amount of airports added by the user */
+int totalFlights; 									/* tracks the total amount of flights added by the user */
+airport allAirports[MAX_AIRPORTS]; 					/* stores all of the current airports */
+flight allFlights[MAX_FLIGHTS]; 					/* stores all of the current flights */
+int sortedAirports[MAX_AIRPORTS]; 					/* stores the indexes of all the airports, sorted by the alphabetical order of the IDs */
+int sortedFlights_departure[MAX_FLIGHTS];			/* stores the indexes of all the flights, sorted by departure date and time */
+int sortedFlights_arrival[MAX_FLIGHTS];				/* stores the indexes of all the flights, sorted by arrival date and time */
+clock global_date = {1, 1, 2022, 0, 0};				/* stores the system date of the system */
+clock max_date = {1, 1, 2023, 0, 0};				/* stores the date that is one year in future from the system date */
+const int days_months[MONTHS] = {31, 28, 31, 30, 	/* stores the amount of days per month in a non leap year */
+								31, 30, 31, 31,
+								30, 31, 30, 31};
 
 int main() {
-    char command;
+	/* executes the program until the user inserts the 'q' command */
+	while (handle_commands()) {
+	}
 
-    /* initializes the global variables store */
-    global_store *global = GlobalInit();
-
-    /* executes the program until the user inserts the 'q' command or reaches
-     * the EOF */
-    while ((command = getchar()) != 'q' && command != EOF) {
-        HandleCommands(global, command);
-    }
-
-    /* clears all of the memory and terminates the program */
-    ExitProgram(global);
-
-    return 0;
+	return 0;
 }
 
 /**
  * Handles command input.
  * Reads one letter inserted by the user and executes the right command.
+ * Returns 1 if the program should continue, otherwise it returns 0 in
+ * order to exit the program.
  */
-void HandleCommands(global_store *global, char command) {
-    switch (command) {
-    case 'a':
-        AddAirport(global);
-        return;
-    case 'l':
-        ListAirports(global);
-        return;
-    case 'v':
-        AddFlight_ListFlights(global);
-        return;
-    case 'p':
-        FlightDeparturesInAirport(global);
-        return;
-    case 'c':
-        FlightArrivalsInAirport(global);
-        return;
-    case 't':
-        AdvanceSystemDate(global);
-        return;
-    case 'r':
-        AddBooking_ListBookings(global);
-        return;
-    case 'e':
-        DeleteBooking_Flight(global);
-        return;
-    default: /* ignore all unknown commands */
-        return;
-    }
+int handle_commands() {
+	char command = getchar();
+	switch(command) {
+		case 'q':
+			/* 'q' command exits the program */
+			return 0;
+		case 'a':
+			AddAirport();
+			return 1;
+		case 'l':
+			ListAirports();
+			return 1;
+		case 'v':
+			AddFlight_ListFlights();
+			return 1;
+		case 'p':
+			FlightDeparturesInAirport();
+			return 1;
+		case 'c':
+			FlightArrivalsInAirport();
+			return 1;
+		case 't':
+			AdvanceSystemDate();
+			return 1;
+		default:
+			/* ignore all unknown commands */
+			return 1;
+	}
 }
 
 /**
  * Handles the 'a' command.
  * Adds a new airport to the system with the specified ID, country and city.
  */
-void AddAirport(global_store *global) {
-    airport new_airport;
+void AddAirport() {
+	char id[ID_LENGTH], country[MAX_COUNTRY_LENGTH], city[MAX_CITY_LENGTH];
 
-    ReadAirport(&new_airport);
+	GetOneArgument(id, 0);
+	GetOneArgument(country, 0);
+	GetOneArgument(city, 1);
 
-    if (CheckAddAirportErrors(global, new_airport.id)) {
-        return;
-    }
+	if (CheckAddAirportErrors(id)) {
+		return;
+	}
 
-    /* actually adds the airport to the system */
-    global->allAirports[global->totalAirports] = new_airport;
-    AddSortedAirport(global, global->allAirports[global->totalAirports]);
-    printf(AIRPORT_ADD_PRINT, global->allAirports[global->totalAirports].id);
+	/* actually adds the airport to the system */
+	strcpy(allAirports[totalAirports].id, id);
+	strcpy(allAirports[totalAirports].country, country);
+	strcpy(allAirports[totalAirports].city, city);
+	allAirports[totalAirports].departures = 0;
 
-    ++global->totalAirports;
+	AddSortedAirport(allAirports[totalAirports]);
+
+	printf(AIRPORT_ADD_PRINT, allAirports[totalAirports].id);
+
+	totalAirports++;
 }
 
 /**
@@ -93,28 +103,28 @@ void AddAirport(global_store *global) {
  * alphabetical order of their ids.
  * Otherwise, the function prints the airports with the specified IDs.
  */
-void ListAirports(global_store *global) {
-    char id[ID_LENGTH];
-    int i, state;
+void ListAirports() {
+	char id[ID_LENGTH];
+	int i, state;
 
-    /* if there is no arguments it lists all airports */
-    if (getchar() == '\n') {
-        ListAllAirports(global);
-        return;
-    }
+	/* if there is no arguments it lists all airports */
+	if (getchar() == '\n') {
+		ListAllAirports();
+		return;
+	}
 
-    do {
-        /* when the state is 1 it means it just read the last argument */
-        state = GetOneArgument(id, UNTIL_WHITESPACE);
+	do {
+		/* when the state is 1 it means it just read the last argument */
+		state = GetOneArgument(id, 0);
 
-        if (CheckAirportExistence(global, id)) {
-            printf(AIRPORT_ERR_NO_ID, id);
-            continue;
-        }
-        i = GetAirport(global, id);
+		if (CheckAirportExistence(id)) {
+			printf(AIRPORT_ERR_NO_ID, id);
+			continue;
+		}
+		i = GetAirport(id);
 
-        PrintAirport(global->allAirports[global->sortedAirports[i]]);
-    } while (state != 1);
+		PrintAirport(allAirports[sortedAirports[i]]);
+	} while (state != 1);
 }
 
 /**
@@ -124,15 +134,32 @@ void ListAirports(global_store *global) {
  * Otherwise, the function adds a new flight to the system with the specified
  * information.
  */
-void AddFlight_ListFlights(global_store *global) {
-    /* if there is no arguments it lists all flights */
-    if (getchar() == '\n') {
-        ListAllFlights(global);
-        return;
-    } else {
-        AddFlight(global);
-        return;
-    }
+void AddFlight_ListFlights() {
+	flight new_flight;
+	int departure_airport;
+
+	/* if there is no arguments it lists all flights */
+	if (getchar() == '\n') {
+		ListAllFlights();
+		return;
+	}
+
+	ReadFlight(&new_flight);
+
+	if (CheckAddFlightErrors(new_flight)) {
+		return;
+	}
+
+	/* actually add the flight to the system */
+	allFlights[totalFlights] = new_flight;
+	AddSortedFlight(sortedFlights_arrival, new_flight, 0);
+	AddSortedFlight(sortedFlights_departure, new_flight, 1);
+
+	/* updates the number of departures on the departure airport */
+	departure_airport = GetAirport(new_flight.departure_id);
+	allAirports[sortedAirports[departure_airport]].departures++;
+
+	totalFlights++;
 }
 
 /**
@@ -140,34 +167,27 @@ void AddFlight_ListFlights(global_store *global) {
  * Lists all of the flights that depart from the airport with the given ID,
  * sorted by the date and time of departure.
  */
-void FlightDeparturesInAirport(global_store *global) {
-    char id[ID_LENGTH];
-    node_t *ptr;
-    list_t *tmp_list;
-    flight *tmp_flight;
+void FlightDeparturesInAirport() {
+	char id[ID_LENGTH];
+	int j, i;
 
-    GetOneArgument(id, UNTIL_WHITESPACE);
-    if (CheckAirportExistence(global, id)) {
-        printf(AIRPORT_ERR_NO_ID, id);
-        return;
-    }
+	GetOneArgument(id, 0);
+	if (CheckAirportExistence(id)) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return;
+	}
 
-    tmp_list = list_create();
+	for (j = 0; j < totalFlights; j++) {
+		/* looks at the sorted flights to find the ones linked to the right */
+		/* departure id */
+		i = sortedFlights_departure[j];
+		if (strcmp(allFlights[i].departure_id, id) == 0) {
+			printf(FLIGHT_PRINT, allFlights[i].flight_code,
+		  						allFlights[i].arrival_id);
 
-    for (ptr = global->allFlights->first; ptr != NULL; ptr = ptr->next) {
-        tmp_flight = (flight *)ptr->data;
-        /* looks at the sorted flights to find the ones linked to the right */
-        /* departure id */
-        if (strcmp(tmp_flight->departure_id, id) == 0) {
-            list_insert(tmp_list, tmp_flight);
-        }
-    }
-
-    sort_list(tmp_list, CompareFlightDatesDeparture);
-
-    PrintFlights(tmp_list->first, DEPARTURE_INFO);
-
-    list_destroy(tmp_list);
+			PrintClock(allFlights[i].date_departure);
+		}
+	}
 }
 
 /**
@@ -175,108 +195,76 @@ void FlightDeparturesInAirport(global_store *global) {
  * Lists all of the flights that arrive at the airport with the given ID,
  * sorted by the date and time of arrival.
  */
-void FlightArrivalsInAirport(global_store *global) {
-    char id[ID_LENGTH];
-    node_t *ptr;
-    list_t *tmp_list;
-    flight *tmp_flight;
+void FlightArrivalsInAirport() {
+	char id[ID_LENGTH];
+	int j, i;
 
-    GetOneArgument(id, UNTIL_WHITESPACE);
-    if (CheckAirportExistence(global, id)) {
-        printf(AIRPORT_ERR_NO_ID, id);
-        return;
-    }
+	GetOneArgument(id, 0);
+	if (CheckAirportExistence(id)) {
+		printf(AIRPORT_ERR_NO_ID, id);
+		return;
+	}
 
-    tmp_list = list_create();
+	for (j = 0; j < totalFlights; j++) {
+		/* looks at the sorted flights to find the ones linked to the right */
+		/* arrival id */
+		i = sortedFlights_arrival[j];
+		if (strcmp(allFlights[i].arrival_id, id) == 0) {
+			printf(FLIGHT_PRINT, allFlights[i].flight_code,
+		  						allFlights[i].departure_id);
 
-    for (ptr = global->allFlights->first; ptr != NULL; ptr = ptr->next) {
-        tmp_flight = (flight *)ptr->data;
-        /* looks at the sorted flights to find the ones linked to the right */
-        /* arrival id */
-        if (strcmp(tmp_flight->arrival_id, id) == 0) {
-            list_insert(tmp_list, tmp_flight);
-        }
-    }
-
-    sort_list(tmp_list, CompareFlightDatesArrival);
-
-    PrintFlights(tmp_list->first, ARRIVAL_INFO);
-
-    list_destroy(tmp_list);
+			PrintClock(allFlights[i].date_arrival);
+		}
+	}
 }
 
 /**
  * Handles the 't' command.
- * Forwards the date of the system.
+ * Forwards the date of the system and sets the max date of the system.
  */
-void AdvanceSystemDate(global_store *global) {
-    char date[DATE_LENGTH];
-    clock *new_date;
+void AdvanceSystemDate() {
+	char date[DATE_LENGTH];
+	clock new_date;
 
-    GetOneArgument(date, UNTIL_WHITESPACE);
-    new_date = ReadClock(date, START_DAY);
+	GetOneArgument(date, 0);
+	new_date = ReadClock(date, START_DAY);
 
-    if (CheckDateErrors(global, new_date)) {
-        printf(DATE_ERR_INVALID);
-        free(new_date);
-        return;
-    }
+	if (CheckDateErrors(new_date)) {
+		printf(DATE_ERR_INVALID);
+		return;
+	}
 
-    free(global->date);
-    global->date = new_date;
+	global_date = new_date;
+	max_date = new_date;
+	max_date.year++; /* sets the max date one year in the future */
 
-    printf(DATE_PRINT, global->date->day, global->date->month,
-           global->date->year);
-}
-
-/**
- * Initializes all of the global variables used throughout the project.
- */
-global_store *GlobalInit() {
-    global_store *global = SecureMalloc(sizeof(global_store));
-    global->date = SecureMalloc(sizeof(clock));
-
-    global->totalAirports = 0;
-    global->allFlights = list_create();
-    global->flightsTable = hashtable_create(HASHTABLE_START_SIZE);
-    global->bookingsTable = hashtable_create(HASHTABLE_START_SIZE);
-
-    global->date->day = 1;
-    global->date->month = 1;
-    global->date->year = 2022;
-    global->date->hours = 0;
-    global->date->minutes = 0;
-
-    return global;
+	printf(DATE_PRINT, global_date.day, global_date.month, global_date.year);
 }
 
 /**
  * Fetches one argument (characters separated by spaces) from the standard
  * input and populates the given string with it.
- * Ignores any trailing white spaces and always stops at a newline or end of
- * file. If the mode is set to UNTIL_EOL it will fetch for an argument that
- * contains whitespaces and only end on a newline or end of file.
+ * Ignores any trailing white spaces and always stops at a newline or end of file.
+ * If the mode is set to 0 it will fetch for an argument that contains whitespaces
+ * and only end on a newline or end of file.
  */
 char GetOneArgument(char *argument, const int mode) {
-    int i = 0;
-    char c = getchar();
+	int i = 0;
+	char c;
 
-    /* ignores trailing white spaces */
-    while (c == ' ' || c == '\t') {
-        c = getchar();
-    }
+	while ((c = getchar()) != '\n' && c != EOF) {
+		/* ignores trailing white space */
+		if (i == 0 && isspace(c)) {
+			continue;
+		}
+		/* finishes argument when a non trailing white space is read if the */
+		/* mode is 0 */
+		if (mode == 0 && isspace(c)) {
+			break;
+		}
+		argument[i++] = c;
+	}
+	argument[i] = '\0';
 
-    /* finishes argument when a non trailing white space is read if the */
-    /* mode is 0 */
-    while (c != '\n' && c != EOF) {
-        if (mode == UNTIL_WHITESPACE && (c == ' ' || c == '\t')) {
-            break;
-        }
-        argument[i++] = c;
-        c = getchar();
-    }
-    argument[i] = '\0';
-
-    return (c != '\n' ? 0
-                      : 1); /* returns a 1 when it reads the last argument */
+	return (c != '\n' ? 0 : 1); /* returns a 1 when it reads the last argument */
 }
